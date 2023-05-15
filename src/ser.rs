@@ -6,9 +6,17 @@ pub trait Serialize {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()>;
 }
 
-impl Serialize for i32 {
-    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        w.write_all(&self.to_be_bytes())?;
-        Ok(())
-    }
+macro_rules! impl_serialize {
+    ($($i:ty) *) => {
+        $(
+            impl Serialize for $i {
+                fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+                    w.write_all(&self.to_be_bytes())?;
+                    Ok(())
+                }
+            }
+        )*
+    };
 }
+
+impl_serialize!(i8 i16 i32 i64 i128 u8 u16 u32 u64 u128);
