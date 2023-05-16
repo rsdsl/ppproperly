@@ -1,8 +1,11 @@
-mod de;
-mod ser;
+pub mod de;
+pub use de::*;
 
 pub mod error;
 pub use error::*;
+
+pub mod ser;
+pub use ser::*;
 
 pub mod types;
 pub use types::*;
@@ -42,6 +45,28 @@ mod tests {
         foo.deserialize(&mut buf.as_ref())?;
 
         assert_eq!(foo.bar, 1337);
+        Ok(())
+    }
+
+    #[test]
+    fn test_serialize_vertype() -> Result<()> {
+        let ver_type = VerType::default();
+
+        let mut buf = Vec::new();
+        ver_type.serialize(&mut buf)?;
+
+        assert_eq!(&buf, &0x11_u8.to_be_bytes());
+        Ok(())
+    }
+
+    #[test]
+    fn test_deserialize_vertype() -> Result<()> {
+        let mut ver_type = VerType(0);
+
+        let buf = 0x11_u8.to_be_bytes();
+        ver_type.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(ver_type, VerType::default());
         Ok(())
     }
 }

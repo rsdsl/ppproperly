@@ -1,7 +1,12 @@
+use crate::{Deserialize, Result, Serialize};
+
+use std::io::{Read, Write};
+
 use bitfield::bitfield;
 
 bitfield! {
     /// Version and type of a PPPoE header combined in a single octet.
+    #[derive(PartialEq, Eq)]
     pub struct VerType(u8);
     impl Debug;
 
@@ -14,5 +19,17 @@ bitfield! {
 impl Default for VerType {
     fn default() -> Self {
         Self(0x11)
+    }
+}
+
+impl Serialize for VerType {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        self.0.serialize(w)
+    }
+}
+
+impl Deserialize for VerType {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        self.0.deserialize(r)
     }
 }
