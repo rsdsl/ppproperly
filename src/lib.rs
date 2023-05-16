@@ -4,6 +4,9 @@ pub use de::*;
 pub mod error;
 pub use error::*;
 
+pub mod pppoe;
+pub use pppoe::*;
+
 pub mod ser;
 pub use ser::*;
 
@@ -111,6 +114,42 @@ mod tests {
         s.deserialize(&mut buf)?;
 
         assert_eq!(s, String::from("Hello, World!"));
+        Ok(())
+    }
+
+    #[test]
+    fn test_serialize_pppoe_header() -> Result<()> {
+        let header = PPPoEHeader {
+            ver_type: VerType::default(),
+            code: PPPoECode::Padt,
+            session_id: 1337,
+            len: 0,
+        };
+
+        let mut buf = Vec::new();
+        header.serialize(&mut buf)?;
+
+        assert_eq!(&buf, &[0x11, 0xa7, 0x05, 0x39, 0x00, 0x00]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_deserialize_pppoe_header() -> Result<()> {
+        let mut header = PPPoEHeader::default();
+
+        let buf = [0x11, 0xa7, 0x05, 0x39, 0x00, 0x00];
+        header.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            header,
+            PPPoEHeader {
+                ver_type: VerType::default(),
+                code: PPPoECode::Padt,
+                session_id: 1337,
+                len: 0,
+            }
+        );
+
         Ok(())
     }
 }
