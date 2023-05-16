@@ -69,4 +69,15 @@ mod tests {
         assert_eq!(ver_type, VerType::default());
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_str() -> Result<()> {
+        let s = "Hello, World!";
+
+        let mut buf = Vec::new();
+        s.serialize(&mut buf)?;
+
+        assert_eq!(&buf, "\x0dHello, World!".as_bytes());
+        Ok(())
+    }
 }
