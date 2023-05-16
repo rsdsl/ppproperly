@@ -7,9 +7,9 @@ pub trait Serialize {
 }
 
 macro_rules! impl_serialize {
-    ($($i:ty) *) => {
+    ($($t:ty) *) => {
         $(
-            impl Serialize for $i {
+            impl Serialize for $t {
                 fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
                     w.write_all(&self.to_be_bytes())?;
                     Ok(())
