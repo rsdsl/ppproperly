@@ -82,6 +82,17 @@ mod tests {
     }
 
     #[test]
+    fn test_deserialize_bytes() -> Result<()> {
+        let mut bytes = Vec::new();
+
+        let buf = [0, 1, 2, 3];
+        bytes.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(&bytes, &[0, 1, 2, 3]);
+        Ok(())
+    }
+
+    #[test]
     fn test_serialize_str() -> Result<()> {
         let s = "Hello, World!";
 
