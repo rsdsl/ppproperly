@@ -4,6 +4,9 @@ mod ser;
 pub mod error;
 pub use error::*;
 
+pub mod types;
+pub use types::*;
+
 #[cfg(test)]
 mod tests {
     use super::{de::Deserialize, ser::Serialize, *};
