@@ -1,8 +1,8 @@
-pub mod error;
-pub use error::*;
-
 mod de;
 mod ser;
+
+pub mod error;
+pub use error::*;
 
 #[cfg(test)]
 mod tests {
