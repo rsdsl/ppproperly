@@ -21,10 +21,17 @@ macro_rules! impl_serialize {
 
 impl_serialize!(i8 i16 i32 i64 i128 u8 u16 u32 u64 u128);
 
+impl Serialize for [u8] {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        w.write_all(self)?;
+        Ok(())
+    }
+}
+
 impl Serialize for &str {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         u8::try_from(self.len())?.serialize(w)?;
-        w.write_all(self.as_bytes())?;
+        self.as_bytes().serialize(w)?;
 
         Ok(())
     }
