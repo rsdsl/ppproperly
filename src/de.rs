@@ -24,3 +24,13 @@ macro_rules! impl_deserialize {
 }
 
 impl_deserialize!(i8 i16 i32 i64 i128 u8 u16 u32 u64 u128);
+
+impl Deserialize for String {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        let mut n = 0u8;
+        n.deserialize(r)?;
+
+        r.take(n.into()).read_to_string(self)?;
+        Ok(())
+    }
+}

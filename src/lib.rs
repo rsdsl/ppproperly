@@ -80,4 +80,15 @@ mod tests {
         assert_eq!(&buf, "\x0dHello, World!".as_bytes());
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_string() -> Result<()> {
+        let mut s = String::new();
+
+        let mut buf = "\x0dHello, World!?".as_bytes();
+        s.deserialize(&mut buf)?;
+
+        assert_eq!(s, String::from("Hello, World!"));
+        Ok(())
+    }
 }
