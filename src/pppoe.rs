@@ -108,6 +108,21 @@ impl PPPoETag {
     fn discriminant(&self) -> u16 {
         unsafe { *<*const _>::from(self).cast::<u16>() }
     }
+
+    fn len(&self) -> usize {
+        match *self {
+            PPPoETag::ACCookie(ref val) => val.len(),
+            PPPoETag::ACName(ref val) => val.len(),
+            PPPoETag::ACSystemError(ref val) => val.len(),
+            PPPoETag::GenericError(ref val) => val.len(),
+            PPPoETag::HostUniq(ref val) => val.len(),
+            PPPoETag::RelaySessionID(ref val) => val.len(),
+            PPPoETag::ServiceName(ref val) => val.len(),
+            PPPoETag::ServiceNameError(ref val) => val.len(),
+            PPPoETag::VendorSpecific(ref val) => val.len(),
+            _ => 0,
+        }
+    }
 }
 
 impl Serialize for PPPoETag {
@@ -323,21 +338,27 @@ impl Deserialize for Vec<PPPoETag> {
     }
 }
 
-/*#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADI {
     pub header: PPPoEHeader,
     pub tags: Vec<PPPoETag>,
 }
 
 impl PPPoEPADI {
-    pub fn new(tags: Vec<PPPoETag>) -> Self {
-        Self {
+    pub fn new(tags: Vec<PPPoETag>) -> Result<Self> {
+        Ok(Self {
             header: PPPoEHeader {
                 ver_type: VerType::default(),
                 code: PPPoECode::Padi,
                 session_id: 0,
+                len: tags
+                    .iter()
+                    .map(|tag| tag.len())
+                    .reduce(|acc, n| acc + n)
+                    .unwrap_or(0)
+                    .try_into()?,
             },
             tags,
-        }
+        })
     }
-}*/
+}
