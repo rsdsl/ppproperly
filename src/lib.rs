@@ -207,4 +207,20 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_pppoe_padi() -> Result<()> {
+        let mut padi = PPPoEPADI::default();
+
+        let buf = [
+            0x11, 0x09, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x02, 0x0d, 0x25,
+        ];
+        padi.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            padi,
+            PPPoEPADI::new(vec![PPPoETag::HostUniq(vec![13, 37])])?
+        );
+        Ok(())
+    }
 }
