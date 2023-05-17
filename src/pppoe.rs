@@ -361,4 +361,28 @@ impl PPPoEPADI {
             tags,
         })
     }
+
+    pub fn validate(&self) -> Result<()> {
+        if self.header.session_id != 0 {
+            return Err(Error::NonZeroSessionID(self.header.session_id));
+        }
+
+        if self.header.code != PPPoECode::Padi {
+            return Err(Error::InvalidPPPoECode(self.header.code as u8));
+        }
+
+        if !self
+            .tags
+            .iter()
+            .any(|tag| matches!(tag, PPPoETag::ServiceName(_)))
+        {
+            return Err(Error::MissingServiceName);
+        }
+
+        if 4 + self.header.len > 1484 {
+            return Err(Error::PADITooBig(4 + self.header.len));
+        }
+
+        Ok(())
+    }
 }

@@ -9,6 +9,12 @@ pub enum Error {
     InvalidPPPoECode(u8),
     #[error("invalid PPPoE tag: {0}")]
     InvalidPPPoETag(u16),
+    #[error("missing service name")]
+    MissingServiceName,
+    #[error("non-zero session ID: {0}")]
+    NonZeroSessionID(u16),
+    #[error("PADI size exceeds 1484 bytes")]
+    PADITooBig(u16),
 
     #[error("conversion from UTF-8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
