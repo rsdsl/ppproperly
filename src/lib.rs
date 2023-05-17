@@ -193,4 +193,18 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_pppoe_padi() -> Result<()> {
+        let padi = PPPoEPADI::new(vec![PPPoETag::HostUniq(vec![13, 37])])?;
+
+        let mut buf = Vec::new();
+        padi.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[0x11, 0x09, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x02, 0x0d, 0x25]
+        );
+        Ok(())
+    }
 }
