@@ -7,6 +7,8 @@ use thiserror::Error;
 pub enum Error {
     #[error("invalid PPPoE code: {0}")]
     InvalidPPPoECode(u8),
+    #[error("invalid PPPoE tag: {0}")]
+    InvalidPPPoETag(u16),
 
     #[error("io: {0}")]
     Io(#[from] io::Error),
