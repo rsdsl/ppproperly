@@ -86,7 +86,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_bytes() -> Result<()> {
-        let mut bytes = Vec::new();
+        let mut bytes: Vec<u8> = Vec::new();
 
         let buf = [0, 1, 2, 3];
         bytes.deserialize(&mut buf.as_ref())?;

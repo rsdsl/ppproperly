@@ -1,6 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize, VerType};
 
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
@@ -86,6 +86,7 @@ pub struct PPPoEHeader {
 #[repr(u16)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPoETag {
+    None = 0xffff, // Dummy variant for deserialization initialization.
     ACCookie(Vec<u8>) = TAG_AC_COOKIE,
     ACName(String) = TAG_AC_NAME,
     ACSystemError(String) = TAG_AC_SYSTEM_ERROR,
@@ -284,6 +285,38 @@ impl Serialize for Vec<PPPoETag> {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         for tag in self {
             tag.serialize(w)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Deserialize for Vec<PPPoETag> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        loop {
+            let mut tag = PPPoETag::None;
+            let result = tag.deserialize(r);
+
+            match result {
+                Ok(_) => {
+                    if let PPPoETag::EndOfList = tag {
+                        break;
+                    }
+
+                    self.push(tag);
+                }
+                Err(e) => {
+                    if let Error::Io(ref ioe) = e {
+                        if ioe.kind() == io::ErrorKind::UnexpectedEof {
+                            break;
+                        } else {
+                            return Err(e);
+                        }
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
         }
 
         Ok(())
