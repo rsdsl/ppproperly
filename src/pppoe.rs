@@ -280,6 +280,16 @@ impl Deserialize for PPPoETag {
     }
 }
 
+impl Serialize for Vec<PPPoETag> {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        for tag in self {
+            tag.serialize(w)?;
+        }
+
+        Ok(())
+    }
+}
+
 /*#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADI {
     pub header: PPPoEHeader,
