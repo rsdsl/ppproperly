@@ -353,7 +353,7 @@ impl PPPoEPADI {
                 session_id: 0,
                 len: tags
                     .iter()
-                    .map(|tag| tag.len())
+                    .map(|tag| 4 + tag.len())
                     .reduce(|acc, n| acc + n)
                     .unwrap_or(0)
                     .try_into()?,
