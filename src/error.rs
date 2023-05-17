@@ -1,4 +1,4 @@
-use std::{io, num};
+use std::{io, num, string};
 
 use thiserror::Error;
 
@@ -10,6 +10,8 @@ pub enum Error {
     #[error("invalid PPPoE tag: {0}")]
     InvalidPPPoETag(u16),
 
+    #[error("conversion from UTF-8: {0}")]
+    FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]
     Io(#[from] io::Error),
     #[error("integer type conversion: {0}")]

@@ -85,61 +85,197 @@ pub struct PPPoEHeader {
 
 #[repr(u16)]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum PPPoETagType {
-    ACCookie = TAG_AC_COOKIE,
-    ACName = TAG_AC_NAME,
-    ACSystemError = TAG_AC_SYSTEM_ERROR,
+pub enum PPPoETag {
+    ACCookie(Vec<u8>) = TAG_AC_COOKIE,
+    ACName(String) = TAG_AC_NAME,
+    ACSystemError(String) = TAG_AC_SYSTEM_ERROR,
     Credits = TAG_CREDITS,
     CreditScaleFactor = TAG_CREDIT_SCALE_FACTOR,
     EndOfList = TAG_END_OF_LIST,
-    GenericError = TAG_GENERIC_ERROR,
-    HostUniq = TAG_HOST_UNIQ,
+    GenericError(String) = TAG_GENERIC_ERROR,
+    HostUniq(Vec<u8>) = TAG_HOST_UNIQ,
     Metrics = TAG_METRICS,
     PPPMaxPayload = TAG_PPP_MAX_PAYLOAD,
-    RelaySessionID = TAG_RELAY_SESSION_ID,
+    RelaySessionID(Vec<u8>) = TAG_RELAY_SESSION_ID,
     SequenceNumber = TAG_SEQUENCE_NUMBER,
-    ServiceName = TAG_SERVICE_NAME,
-    ServiceNameError = TAG_SERVICE_NAME_ERROR,
-    VendorSpecific = TAG_VENDOR_SPECIFIC,
+    ServiceName(String) = TAG_SERVICE_NAME,
+    ServiceNameError(String) = TAG_SERVICE_NAME_ERROR,
+    VendorSpecific(Vec<u8>) = TAG_VENDOR_SPECIFIC,
 }
 
-impl TryFrom<u16> for PPPoETagType {
-    type Error = Error;
-
-    fn try_from(tag_type: u16) -> Result<Self> {
-        match tag_type {
-            TAG_AC_COOKIE => Ok(Self::ACCookie),
-            TAG_AC_NAME => Ok(Self::ACName),
-            TAG_AC_SYSTEM_ERROR => Ok(Self::ACSystemError),
-            TAG_CREDITS => Ok(Self::Credits),
-            TAG_CREDIT_SCALE_FACTOR => Ok(Self::CreditScaleFactor),
-            TAG_END_OF_LIST => Ok(Self::EndOfList),
-            TAG_GENERIC_ERROR => Ok(Self::GenericError),
-            TAG_HOST_UNIQ => Ok(Self::HostUniq),
-            TAG_METRICS => Ok(Self::Metrics),
-            TAG_PPP_MAX_PAYLOAD => Ok(Self::PPPMaxPayload),
-            TAG_RELAY_SESSION_ID => Ok(Self::RelaySessionID),
-            TAG_SEQUENCE_NUMBER => Ok(Self::SequenceNumber),
-            TAG_SERVICE_NAME => Ok(Self::ServiceName),
-            TAG_SERVICE_NAME_ERROR => Ok(Self::ServiceNameError),
-            TAG_VENDOR_SPECIFIC => Ok(Self::VendorSpecific),
-            _ => Err(Error::InvalidPPPoETag(tag_type)),
-        }
+impl PPPoETag {
+    fn discriminant(&self) -> u16 {
+        unsafe { *<*const _>::from(self).cast::<u16>() }
     }
 }
 
-impl Serialize for PPPoETagType {
+impl Serialize for PPPoETag {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        (self.clone() as u16).serialize(w)
+        self.discriminant().serialize(w)?;
+
+        match *self {
+            Self::ACCookie(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                val.serialize(w)?;
+            }
+            Self::ACName(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                // Call `as_bytes` to avoid writing another u8 length field.
+                val.as_bytes().serialize(w)?;
+            }
+            Self::ACSystemError(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                // Call `as_bytes` to avoid writing another u8 length field.
+                val.as_bytes().serialize(w)?;
+            }
+            Self::GenericError(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                // Call `as_bytes` to avoid writing another u8 length field.
+                val.as_bytes().serialize(w)?;
+            }
+            Self::HostUniq(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                val.serialize(w)?;
+            }
+            Self::RelaySessionID(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                val.serialize(w)?;
+            }
+            Self::ServiceName(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                // Call `as_bytes` to avoid writing another u8 length field.
+                val.as_bytes().serialize(w)?;
+            }
+            Self::ServiceNameError(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                // Call `as_bytes` to avoid writing another u8 length field.
+                val.as_bytes().serialize(w)?;
+            }
+            Self::VendorSpecific(ref val) => {
+                let n: u16 = val.len().try_into()?;
+                n.serialize(w)?;
+
+                val.serialize(w)?;
+            }
+            _ => {}
+        }
+
+        Ok(())
     }
 }
 
-impl Deserialize for PPPoETagType {
+impl Deserialize for PPPoETag {
     fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         let mut tag_type = 0xffff_u16;
         tag_type.deserialize(r)?;
 
-        *self = Self::try_from(tag_type)?;
+        match tag_type {
+            TAG_AC_COOKIE => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::ACCookie(val);
+            }
+            TAG_AC_NAME => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::ACName(String::from_utf8(val)?);
+            }
+            TAG_AC_SYSTEM_ERROR => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::ACSystemError(String::from_utf8(val)?);
+            }
+            TAG_CREDITS => *self = Self::Credits,
+            TAG_CREDIT_SCALE_FACTOR => *self = Self::CreditScaleFactor,
+            TAG_END_OF_LIST => *self = Self::EndOfList,
+            TAG_GENERIC_ERROR => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::GenericError(String::from_utf8(val)?);
+            }
+            TAG_HOST_UNIQ => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::HostUniq(val);
+            }
+            TAG_METRICS => *self = Self::Metrics,
+            TAG_PPP_MAX_PAYLOAD => *self = Self::PPPMaxPayload,
+            TAG_RELAY_SESSION_ID => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::RelaySessionID(val);
+            }
+            TAG_SEQUENCE_NUMBER => *self = Self::SequenceNumber,
+            TAG_SERVICE_NAME => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::ServiceName(String::from_utf8(val)?);
+            }
+            TAG_SERVICE_NAME_ERROR => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::ServiceNameError(String::from_utf8(val)?);
+            }
+            TAG_VENDOR_SPECIFIC => {
+                let mut n = 0u16;
+                n.deserialize(r)?;
+
+                let mut val = Vec::new();
+                val.deserialize(&mut r.take(n.into()))?;
+
+                *self = Self::VendorSpecific(val);
+            }
+            _ => return Err(Error::InvalidPPPoETag(tag_type)),
+        }
+
         Ok(())
     }
 }
