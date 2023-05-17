@@ -152,4 +152,25 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_pppoe_tags() -> Result<()> {
+        let tags = vec![
+            PPPoETag::HostUniq(vec![13, 37]),
+            PPPoETag::GenericError(String::from("err")),
+            PPPoETag::Metrics,
+        ];
+
+        let mut buf = Vec::new();
+        tags.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x01, 0x03, 0x00, 0x02, 0x0d, 0x25, 0x02, 0x03, 0x00, 0x03, 0x65, 0x72, 0x72, 0x01,
+                0x07
+            ]
+        );
+        Ok(())
+    }
 }
