@@ -149,7 +149,6 @@ mod tests {
                 len: 0,
             }
         );
-
         Ok(())
     }
 
