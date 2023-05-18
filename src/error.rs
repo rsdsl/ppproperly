@@ -13,6 +13,8 @@ pub enum Error {
     InvalidPPPoETag(u16),
     #[error("missing service name")]
     MissingServiceName,
+    #[error("missing access concentrator name")]
+    MissingACName,
     #[error("non-zero session ID: {0}")]
     NonZeroSessionID(u16),
     #[error("PADI size exceeds 1484 bytes")]

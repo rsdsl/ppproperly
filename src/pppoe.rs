@@ -473,3 +473,66 @@ impl PPPoEPADI {
         Ok(())
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADOData {
+    pub tags: Vec<PPPoETag>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADO {
+    pub header: PPPoEHeader,
+    pub payload: PPPoEPADOData,
+}
+
+impl PPPoEPADO {
+    pub fn new(dst_mac: MACAddr, src_mac: MACAddr, tags: Vec<PPPoETag>) -> Result<Self> {
+        Ok(Self {
+            header: PPPoEHeader {
+                dst_mac,
+                src_mac,
+                ether_type: EtherType::PPPoED,
+                ver_type: VerType::default(),
+                code: PPPoECode::Pado,
+                session_id: 0,
+                len: tags
+                    .iter()
+                    .map(|tag| 4 + tag.len())
+                    .reduce(|acc, n| acc + n)
+                    .unwrap_or(0)
+                    .try_into()?,
+            },
+            payload: PPPoEPADOData { tags },
+        })
+    }
+
+    pub fn validate(&self) -> Result<()> {
+        if self.header.session_id != 0 {
+            return Err(Error::NonZeroSessionID(self.header.session_id));
+        }
+
+        if self.header.code != PPPoECode::Pado {
+            return Err(Error::InvalidPPPoECode(self.header.code as u8));
+        }
+
+        if !self
+            .payload
+            .tags
+            .iter()
+            .any(|tag| matches!(tag, PPPoETag::ACName(_)))
+        {
+            return Err(Error::MissingACName);
+        }
+
+        if !self
+            .payload
+            .tags
+            .iter()
+            .any(|tag| matches!(tag, PPPoETag::ServiceName(_)))
+        {
+            return Err(Error::MissingServiceName);
+        }
+
+        Ok(())
+    }
+}
