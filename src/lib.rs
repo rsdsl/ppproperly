@@ -404,4 +404,26 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_pppoe_padt() -> Result<()> {
+        let mut padt = PPPoEPADTPkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
+            0x11, 0xa7, 0x00, 0x01, 0x00, 0x07, 0x02, 0x03, 0x00, 0x03, 0x65, 0x72, 0x72,
+        ];
+        padt.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            padt,
+            PPPoEPADTPkt::new(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                1,
+                vec![PPPoETag::GenericError("err".into())]
+            )?
+        );
+        Ok(())
+    }
 }
