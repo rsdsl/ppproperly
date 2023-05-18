@@ -646,3 +646,49 @@ impl PPPoEPADSPkt {
         Ok(())
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADT {
+    pub tags: Vec<PPPoETag>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADTPkt {
+    pub header: PPPoEHeader,
+    pub payload: PPPoEPADT,
+}
+
+impl PPPoEPADTPkt {
+    pub fn new(
+        dst_mac: MACAddr,
+        src_mac: MACAddr,
+        session_id: u16,
+        tags: Vec<PPPoETag>,
+    ) -> Result<Self> {
+        Ok(Self {
+            header: PPPoEHeader {
+                dst_mac,
+                src_mac,
+                ether_type: EtherType::PPPoED,
+                ver_type: VerType::default(),
+                code: PPPoECode::Padt,
+                session_id,
+                len: tags
+                    .iter()
+                    .map(|tag| 4 + tag.len())
+                    .reduce(|acc, n| acc + n)
+                    .unwrap_or(0)
+                    .try_into()?,
+            },
+            payload: PPPoEPADT { tags },
+        })
+    }
+
+    pub fn validate(&self) -> Result<()> {
+        if self.header.code != PPPoECode::Padt {
+            return Err(Error::InvalidPPPoECode(self.header.code as u8));
+        }
+
+        Ok(())
+    }
+}
