@@ -590,3 +590,59 @@ impl PPPoEPADRPkt {
         Ok(())
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADS {
+    pub tags: Vec<PPPoETag>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADSPkt {
+    pub header: PPPoEHeader,
+    pub payload: PPPoEPADS,
+}
+
+impl PPPoEPADSPkt {
+    pub fn new(
+        dst_mac: MACAddr,
+        src_mac: MACAddr,
+        session_id: u16,
+        tags: Vec<PPPoETag>,
+    ) -> Result<Self> {
+        Ok(Self {
+            header: PPPoEHeader {
+                dst_mac,
+                src_mac,
+                ether_type: EtherType::PPPoED,
+                ver_type: VerType::default(),
+                code: PPPoECode::Pads,
+                session_id,
+                len: tags
+                    .iter()
+                    .map(|tag| 4 + tag.len())
+                    .reduce(|acc, n| acc + n)
+                    .unwrap_or(0)
+                    .try_into()?,
+            },
+            payload: PPPoEPADS { tags },
+        })
+    }
+
+    pub fn validate(&self) -> Result<()> {
+        if self.header.code != PPPoECode::Pads {
+            return Err(Error::InvalidPPPoECode(self.header.code as u8));
+        }
+
+        if !self.payload.tags.iter().any(|tag| {
+            matches!(tag, PPPoETag::ServiceName(_)) || matches!(tag, PPPoETag::ServiceNameError(_))
+        }) {
+            return Err(Error::MissingServiceName);
+        }
+
+        if self.payload.tags.len() != 1 {
+            return Err(Error::InvalidNumberOfTags(1, self.payload.tags.len()));
+        }
+
+        Ok(())
+    }
+}

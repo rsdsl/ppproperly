@@ -15,6 +15,8 @@ pub enum Error {
     MissingServiceName,
     #[error("missing access concentrator name")]
     MissingACName,
+    #[error("invalid number of tags: expected {0}, got {1}")]
+    InvalidNumberOfTags(usize, usize),
     #[error("non-zero session ID: {0}")]
     NonZeroSessionID(u16),
     #[error("PADI size exceeds 1484 bytes")]
