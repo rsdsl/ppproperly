@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_padi() -> Result<()> {
-        let padi = PPPoEPADI::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?;
+        let padi = PPPoEPADIPkt::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?;
 
         let mut buf = Vec::new();
         padi.serialize(&mut buf)?;
@@ -228,7 +228,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_padi() -> Result<()> {
-        let mut padi = PPPoEPADI::default();
+        let mut padi = PPPoEPADIPkt::default();
 
         let buf = [
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x63,
@@ -238,7 +238,7 @@ mod tests {
 
         assert_eq!(
             padi,
-            PPPoEPADI::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?
+            PPPoEPADIPkt::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?
         );
         Ok(())
     }

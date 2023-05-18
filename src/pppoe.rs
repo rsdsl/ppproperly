@@ -417,17 +417,17 @@ impl Deserialize for Vec<PPPoETag> {
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADIData {
+pub struct PPPoEPADI {
     pub tags: Vec<PPPoETag>,
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADI {
+pub struct PPPoEPADIPkt {
     pub header: PPPoEHeader,
-    pub payload: PPPoEPADIData,
+    pub payload: PPPoEPADI,
 }
 
-impl PPPoEPADI {
+impl PPPoEPADIPkt {
     pub fn new(src_mac: MACAddr, tags: Vec<PPPoETag>) -> Result<Self> {
         Ok(Self {
             header: PPPoEHeader {
@@ -444,7 +444,7 @@ impl PPPoEPADI {
                     .unwrap_or(0)
                     .try_into()?,
             },
-            payload: PPPoEPADIData { tags },
+            payload: PPPoEPADI { tags },
         })
     }
 
@@ -475,17 +475,17 @@ impl PPPoEPADI {
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADOData {
+pub struct PPPoEPADO {
     pub tags: Vec<PPPoETag>,
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADO {
+pub struct PPPoEPADOPkt {
     pub header: PPPoEHeader,
-    pub payload: PPPoEPADOData,
+    pub payload: PPPoEPADO,
 }
 
-impl PPPoEPADO {
+impl PPPoEPADOPkt {
     pub fn new(dst_mac: MACAddr, src_mac: MACAddr, tags: Vec<PPPoETag>) -> Result<Self> {
         Ok(Self {
             header: PPPoEHeader {
@@ -502,7 +502,7 @@ impl PPPoEPADO {
                     .unwrap_or(0)
                     .try_into()?,
             },
-            payload: PPPoEPADOData { tags },
+            payload: PPPoEPADO { tags },
         })
     }
 
