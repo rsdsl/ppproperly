@@ -120,6 +120,9 @@ mod tests {
     #[test]
     fn test_serialize_pppoe_header() -> Result<()> {
         let header = PPPoEHeader {
+            dst_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            src_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            ether_type: EtherType::PPPoED,
             ver_type: VerType::default(),
             code: PPPoECode::Padt,
             session_id: 1337,
@@ -129,7 +132,13 @@ mod tests {
         let mut buf = Vec::new();
         header.serialize(&mut buf)?;
 
-        assert_eq!(&buf, &[0x11, 0xa7, 0x05, 0x39, 0x00, 0x00]);
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
+                0x11, 0xa7, 0x05, 0x39, 0x00, 0x00
+            ]
+        );
         Ok(())
     }
 
@@ -137,12 +146,18 @@ mod tests {
     fn test_deserialize_pppoe_header() -> Result<()> {
         let mut header = PPPoEHeader::default();
 
-        let buf = [0x11, 0xa7, 0x05, 0x39, 0x00, 0x00];
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
+            0x11, 0xa7, 0x05, 0x39, 0x00, 0x00,
+        ];
         header.deserialize(&mut buf.as_ref())?;
 
         assert_eq!(
             header,
             PPPoEHeader {
+                dst_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                src_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                ether_type: EtherType::PPPoED,
                 ver_type: VerType::default(),
                 code: PPPoECode::Padt,
                 session_id: 1337,
@@ -196,14 +211,17 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_padi() -> Result<()> {
-        let padi = PPPoEPADI::new(vec![PPPoETag::HostUniq(vec![13, 37])])?;
+        let padi = PPPoEPADI::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?;
 
         let mut buf = Vec::new();
         padi.serialize(&mut buf)?;
 
         assert_eq!(
             &buf,
-            &[0x11, 0x09, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x02, 0x0d, 0x25]
+            &[
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x63,
+                0x11, 0x09, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x02, 0x0d, 0x25
+            ]
         );
         Ok(())
     }
@@ -213,13 +231,14 @@ mod tests {
         let mut padi = PPPoEPADI::default();
 
         let buf = [
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x63,
             0x11, 0x09, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x02, 0x0d, 0x25,
         ];
         padi.deserialize(&mut buf.as_ref())?;
 
         assert_eq!(
             padi,
-            PPPoEPADI::new(vec![PPPoETag::HostUniq(vec![13, 37])])?
+            PPPoEPADI::new(MACAddr::UNSPECIFIED, vec![PPPoETag::HostUniq(vec![13, 37])])?
         );
         Ok(())
     }

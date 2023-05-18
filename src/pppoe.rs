@@ -4,6 +4,9 @@ use std::io::{self, Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
+const ETHER_TYPE_PPPOED: u16 = 0x8863;
+const ETHER_TYPE_PPPOES: u16 = 0x8864;
+
 const PASP: u8 = 0x00; // PPPoE Active Session PPP Packet
 const PADI: u8 = 0x09;
 const PADO: u8 = 0x07;
@@ -26,6 +29,78 @@ const TAG_SEQUENCE_NUMBER: u16 = 0x0108;
 const TAG_SERVICE_NAME: u16 = 0x0101;
 const TAG_SERVICE_NAME_ERROR: u16 = 0x0201;
 const TAG_VENDOR_SPECIFIC: u16 = 0x0105;
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct MACAddr(pub [u8; 6]);
+
+impl MACAddr {
+    pub const UNSPECIFIED: MACAddr = MACAddr([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+    pub const BROADCAST: MACAddr = MACAddr([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
+}
+
+impl From<[u8; 6]> for MACAddr {
+    fn from(mac: [u8; 6]) -> Self {
+        Self(mac)
+    }
+}
+
+impl Serialize for MACAddr {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        self.0.serialize(w)?;
+        Ok(())
+    }
+}
+
+impl Deserialize for MACAddr {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        let mut buf = Vec::new();
+        buf.deserialize(&mut r.take(6))?;
+
+        self.0.copy_from_slice(&buf);
+        Ok(())
+    }
+}
+
+#[repr(u16)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EtherType {
+    PPPoED = ETHER_TYPE_PPPOED,
+    PPPoES = ETHER_TYPE_PPPOES,
+}
+
+impl Default for EtherType {
+    fn default() -> Self {
+        Self::PPPoED
+    }
+}
+
+impl TryFrom<u16> for EtherType {
+    type Error = Error;
+
+    fn try_from(ether_type: u16) -> Result<Self> {
+        match ether_type {
+            ETHER_TYPE_PPPOED => Ok(Self::PPPoED),
+            ETHER_TYPE_PPPOES => Ok(Self::PPPoES),
+            _ => Err(Error::InvalidEtherType(ether_type)),
+        }
+    }
+}
+
+impl Serialize for EtherType {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        (*self as u16).serialize(w)
+    }
+}
+
+impl Deserialize for EtherType {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        let mut ether_type = 0u16;
+        ether_type.deserialize(r)?;
+
+        *self = Self::try_from(ether_type)?;
+        Ok(())
+    }
+}
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -77,6 +152,9 @@ impl Deserialize for PPPoECode {
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEHeader {
+    pub dst_mac: MACAddr,
+    pub src_mac: MACAddr,
+    pub ether_type: EtherType,
     pub ver_type: VerType,
     pub code: PPPoECode,
     pub session_id: u16,
@@ -345,9 +423,12 @@ pub struct PPPoEPADI {
 }
 
 impl PPPoEPADI {
-    pub fn new(tags: Vec<PPPoETag>) -> Result<Self> {
+    pub fn new(src_mac: MACAddr, tags: Vec<PPPoETag>) -> Result<Self> {
         Ok(Self {
             header: PPPoEHeader {
+                dst_mac: MACAddr::BROADCAST,
+                src_mac,
+                ether_type: EtherType::PPPoED,
                 ver_type: VerType::default(),
                 code: PPPoECode::Padi,
                 session_id: 0,

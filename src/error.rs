@@ -5,6 +5,8 @@ use thiserror::Error;
 /// Any ppproperly or library error.
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("invalid EtherType: {0}")]
+    InvalidEtherType(u16),
     #[error("invalid PPPoE code: {0}")]
     InvalidPPPoECode(u8),
     #[error("invalid PPPoE tag: {0}")]
