@@ -417,9 +417,14 @@ impl Deserialize for Vec<PPPoETag> {
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADIData {
+    pub tags: Vec<PPPoETag>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADI {
     pub header: PPPoEHeader,
-    pub tags: Vec<PPPoETag>,
+    pub payload: PPPoEPADIData,
 }
 
 impl PPPoEPADI {
@@ -439,7 +444,7 @@ impl PPPoEPADI {
                     .unwrap_or(0)
                     .try_into()?,
             },
-            tags,
+            payload: PPPoEPADIData { tags },
         })
     }
 
@@ -453,6 +458,7 @@ impl PPPoEPADI {
         }
 
         if !self
+            .payload
             .tags
             .iter()
             .any(|tag| matches!(tag, PPPoETag::ServiceName(_)))
