@@ -161,7 +161,7 @@ pub struct PPPoEHeader {
     pub len: u16,
 }
 
-#[repr(u16)]
+/*#[repr(u16)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPoETag {
     None = 0xffff, // Dummy variant for deserialization initialization.
@@ -414,67 +414,83 @@ impl Deserialize for Vec<PPPoETag> {
 
         Ok(())
     }
+}*/
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum PPPoEPkt {
+    Padi(PPPoEPADI),
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADI {
-    pub tags: Vec<PPPoETag>,
+impl Default for PPPoEPkt {
+    fn default() -> Self {
+        Self::Padi(PPPoEPADI::default())
+    }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPoEPADIPkt {
-    pub header: PPPoEHeader,
-    pub payload: PPPoEPADI,
+impl Serialize for PPPoEPkt {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        match self {
+            Self::Padi(payload) => payload.serialize(w),
+        }
+    }
 }
 
-impl PPPoEPADIPkt {
-    pub fn new(src_mac: MACAddr, tags: Vec<PPPoETag>) -> Result<Self> {
-        Ok(Self {
-            header: PPPoEHeader {
-                dst_mac: MACAddr::BROADCAST,
-                src_mac,
-                ether_type: EtherType::PPPoED,
-                ver_type: VerType::default(),
-                code: PPPoECode::Padi,
-                session_id: 0,
-                len: tags
-                    .iter()
-                    .map(|tag| 4 + tag.len())
-                    .reduce(|acc, n| acc + n)
-                    .unwrap_or(0)
-                    .try_into()?,
-            },
-            payload: PPPoEPADI { tags },
-        })
+impl PPPoEPkt {
+    fn discriminant(&self) -> u8 {
+        match *self {
+            Self::Padi(_) => PADI,
+        }
     }
 
-    pub fn validate(&self) -> Result<()> {
-        if self.header.session_id != 0 {
-            return Err(Error::NonZeroSessionID(self.header.session_id));
+    fn len(&self) -> u16 {
+        match self {
+            Self::Padi(payload) => payload.len(),
         }
+    }
 
-        if self.header.code != PPPoECode::Padi {
-            return Err(Error::InvalidPPPoECode(self.header.code as u8));
-        }
+    fn deserialize_with_discriminant<R: Read>(
+        &mut self,
+        r: &mut R,
+        discriminant: u8,
+    ) -> Result<()> {
+        match discriminant {
+            PADI => {
+                let mut tmp = PPPoEPADI::default();
+                tmp.deserialize(r)?;
 
-        if !self
-            .payload
-            .tags
-            .iter()
-            .any(|tag| matches!(tag, PPPoETag::ServiceName(_)))
-        {
-            return Err(Error::MissingServiceName);
-        }
-
-        if 4 + self.header.len > 1484 {
-            return Err(Error::PADITooBig(4 + self.header.len));
+                *self = Self::Padi(tmp);
+            }
+            _ => {}
         }
 
         Ok(())
     }
 }
 
+#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+pub struct PPPoEFullPkt {
+    dst_mac: MACAddr,
+    src_mac: MACAddr,
+    ether_type: EtherType,
+    ver_type: VerType,
+    #[ppproperly(discriminant_for = "payload")]
+    session_id: u16,
+    #[ppproperly(len_for = "payload")]
+    payload: PPPoEPkt,
+}
+
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADI {
+    pub tags: Vec<u8>,
+}
+
+impl PPPoEPADI {
+    pub fn len(&self) -> u16 {
+        self.tags.len().try_into().unwrap()
+    }
+}
+
+/*#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADO {
     pub tags: Vec<PPPoETag>,
 }
@@ -691,4 +707,4 @@ impl PPPoEPADTPkt {
 
         Ok(())
     }
-}
+}*/
