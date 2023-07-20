@@ -161,260 +161,172 @@ pub struct PPPoEHeader {
     pub len: u16,
 }
 
-/*#[repr(u16)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPoETag {
-    None = 0xffff, // Dummy variant for deserialization initialization.
-    ACCookie(Vec<u8>) = TAG_AC_COOKIE,
-    ACName(String) = TAG_AC_NAME,
-    ACSystemError(String) = TAG_AC_SYSTEM_ERROR,
-    Credits = TAG_CREDITS,
-    CreditScaleFactor = TAG_CREDIT_SCALE_FACTOR,
-    EndOfList = TAG_END_OF_LIST,
-    GenericError(String) = TAG_GENERIC_ERROR,
-    HostUniq(Vec<u8>) = TAG_HOST_UNIQ,
-    Metrics = TAG_METRICS,
-    PPPMaxPayload = TAG_PPP_MAX_PAYLOAD,
-    RelaySessionID(Vec<u8>) = TAG_RELAY_SESSION_ID,
-    SequenceNumber = TAG_SEQUENCE_NUMBER,
-    ServiceName(String) = TAG_SERVICE_NAME,
-    ServiceNameError(String) = TAG_SERVICE_NAME_ERROR,
-    VendorSpecific(Vec<u8>) = TAG_VENDOR_SPECIFIC,
-}
-
-impl PPPoETag {
-    fn discriminant(&self) -> u16 {
-        unsafe { *<*const _>::from(self).cast::<u16>() }
-    }
-
-    fn len(&self) -> usize {
-        match *self {
-            PPPoETag::ACCookie(ref val) => val.len(),
-            PPPoETag::ACName(ref val) => val.len(),
-            PPPoETag::ACSystemError(ref val) => val.len(),
-            PPPoETag::GenericError(ref val) => val.len(),
-            PPPoETag::HostUniq(ref val) => val.len(),
-            PPPoETag::RelaySessionID(ref val) => val.len(),
-            PPPoETag::ServiceName(ref val) => val.len(),
-            PPPoETag::ServiceNameError(ref val) => val.len(),
-            PPPoETag::VendorSpecific(ref val) => val.len(),
-            _ => 0,
-        }
-    }
+    ACCookie(Vec<u8>),
+    ACName(String),
+    ACSystemError(String),
+    Credits,
+    CreditScaleFactor,
+    EndOfList,
+    GenericError(String),
+    HostUniq(Vec<u8>),
+    Metrics,
+    PPPMaxPayload,
+    RelaySessionID(Vec<u8>),
+    SequenceNumber,
+    ServiceName(String),
+    ServiceNameError(String),
+    VendorSpecific(Vec<u8>),
 }
 
 impl Serialize for PPPoETag {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        self.discriminant().serialize(w)?;
-
-        match *self {
-            Self::ACCookie(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                val.serialize(w)?;
-            }
-            Self::ACName(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                // Call `as_bytes` to avoid writing another u8 length field.
-                val.as_bytes().serialize(w)?;
-            }
-            Self::ACSystemError(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                // Call `as_bytes` to avoid writing another u8 length field.
-                val.as_bytes().serialize(w)?;
-            }
-            Self::GenericError(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                // Call `as_bytes` to avoid writing another u8 length field.
-                val.as_bytes().serialize(w)?;
-            }
-            Self::HostUniq(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                val.serialize(w)?;
-            }
-            Self::RelaySessionID(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                val.serialize(w)?;
-            }
-            Self::ServiceName(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                // Call `as_bytes` to avoid writing another u8 length field.
-                val.as_bytes().serialize(w)?;
-            }
-            Self::ServiceNameError(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                // Call `as_bytes` to avoid writing another u8 length field.
-                val.as_bytes().serialize(w)?;
-            }
-            Self::VendorSpecific(ref val) => {
-                let n: u16 = val.len().try_into()?;
-                n.serialize(w)?;
-
-                val.serialize(w)?;
-            }
-            _ => {}
+        match self {
+            Self::ACCookie(payload) => payload.serialize(w),
+            Self::ACName(payload) => payload.as_str().serialize(w),
+            Self::ACSystemError(payload) => payload.as_str().serialize(w),
+            Self::Credits => Ok(()),
+            Self::CreditScaleFactor => Ok(()),
+            Self::EndOfList => Ok(()),
+            Self::GenericError(payload) => payload.as_str().serialize(w),
+            Self::HostUniq(payload) => payload.serialize(w),
+            Self::Metrics => Ok(()),
+            Self::PPPMaxPayload => Ok(()),
+            Self::RelaySessionID(payload) => payload.serialize(w),
+            Self::SequenceNumber => Ok(()),
+            Self::ServiceName(payload) => payload.as_str().serialize(w),
+            Self::ServiceNameError(payload) => payload.as_str().serialize(w),
+            Self::VendorSpecific(payload) => payload.serialize(w),
         }
-
-        Ok(())
     }
 }
 
-impl Deserialize for PPPoETag {
-    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        let mut tag_type = 0xffff_u16;
-        tag_type.deserialize(r)?;
+impl PPPoETag {
+    fn discriminant(&self) -> u16 {
+        match *self {
+            Self::ACCookie(_) => TAG_AC_COOKIE,
+            Self::ACName(_) => TAG_AC_NAME,
+            Self::ACSystemError(_) => TAG_AC_SYSTEM_ERROR,
+            Self::Credits => TAG_CREDITS,
+            Self::CreditScaleFactor => TAG_CREDIT_SCALE_FACTOR,
+            Self::EndOfList => TAG_END_OF_LIST,
+            Self::GenericError(_) => TAG_GENERIC_ERROR,
+            Self::HostUniq(_) => TAG_HOST_UNIQ,
+            Self::Metrics => TAG_METRICS,
+            Self::PPPMaxPayload => TAG_PPP_MAX_PAYLOAD,
+            Self::RelaySessionID(_) => TAG_RELAY_SESSION_ID,
+            Self::SequenceNumber => TAG_SEQUENCE_NUMBER,
+            Self::ServiceName(_) => TAG_SERVICE_NAME,
+            Self::ServiceNameError(_) => TAG_SERVICE_NAME_ERROR,
+            Self::VendorSpecific(_) => TAG_VENDOR_SPECIFIC,
+        }
+    }
 
-        match tag_type {
+    fn len(&self) -> u16 {
+        match self {
+            Self::ACCookie(payload) => payload.len().try_into().unwrap(),
+            Self::ACName(payload) => payload.len().try_into().unwrap(),
+            Self::ACSystemError(payload) => payload.len().try_into().unwrap(),
+            Self::Credits => 0,
+            Self::CreditScaleFactor => 0,
+            Self::EndOfList => 0,
+            Self::GenericError(payload) => payload.len().try_into().unwrap(),
+            Self::HostUniq(payload) => payload.len().try_into().unwrap(),
+            Self::Metrics => 0,
+            Self::PPPMaxPayload => 0,
+            Self::RelaySessionID(payload) => payload.len().try_into().unwrap(),
+            Self::SequenceNumber => 0,
+            Self::ServiceName(payload) => payload.len().try_into().unwrap(),
+            Self::ServiceNameError(payload) => payload.len().try_into().unwrap(),
+            Self::VendorSpecific(payload) => payload.len().try_into().unwrap(),
+        }
+    }
+
+    fn deserialize_with_discriminant16<R: Read>(
+        &mut self,
+        mut r: Take<&mut R>,
+        discriminant: &u16,
+    ) -> Result<()> {
+        match *discriminant {
             TAG_AC_COOKIE => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = vec![];
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::ACCookie(val);
+                *self = Self::ACCookie(tmp);
             }
             TAG_AC_NAME => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = String::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::ACName(String::from_utf8(val)?);
+                *self = Self::ACName(tmp);
             }
             TAG_AC_SYSTEM_ERROR => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = String::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::ACSystemError(String::from_utf8(val)?);
+                *self = Self::ACSystemError(tmp);
             }
-            TAG_CREDITS => *self = Self::Credits,
-            TAG_CREDIT_SCALE_FACTOR => *self = Self::CreditScaleFactor,
-            TAG_END_OF_LIST => *self = Self::EndOfList,
+            TAG_CREDITS => {
+                *self = Self::Credits;
+            }
+            TAG_CREDIT_SCALE_FACTOR => {
+                *self = Self::CreditScaleFactor;
+            }
+            TAG_END_OF_LIST => {
+                *self = Self::EndOfList;
+            }
             TAG_GENERIC_ERROR => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = String::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::GenericError(String::from_utf8(val)?);
+                *self = Self::GenericError(tmp);
             }
             TAG_HOST_UNIQ => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = Vec::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::HostUniq(val);
+                *self = Self::HostUniq(tmp);
             }
-            TAG_METRICS => *self = Self::Metrics,
-            TAG_PPP_MAX_PAYLOAD => *self = Self::PPPMaxPayload,
+            TAG_METRICS => {
+                *self = Self::Metrics;
+            }
+            TAG_PPP_MAX_PAYLOAD => {
+                *self = Self::PPPMaxPayload;
+            }
             TAG_RELAY_SESSION_ID => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = Vec::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::RelaySessionID(val);
+                *self = Self::RelaySessionID(tmp);
             }
-            TAG_SEQUENCE_NUMBER => *self = Self::SequenceNumber,
+            TAG_SEQUENCE_NUMBER => {
+                *self = Self::SequenceNumber;
+            }
             TAG_SERVICE_NAME => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = String::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::ServiceName(String::from_utf8(val)?);
+                *self = Self::ServiceName(tmp);
             }
             TAG_SERVICE_NAME_ERROR => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = String::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::ServiceNameError(String::from_utf8(val)?);
+                *self = Self::ServiceNameError(tmp);
             }
             TAG_VENDOR_SPECIFIC => {
-                let mut n = 0u16;
-                n.deserialize(r)?;
+                let mut tmp = Vec::default();
+                tmp.deserialize(&mut r)?;
 
-                let mut val = Vec::new();
-                val.deserialize(&mut r.take(n.into()))?;
-
-                *self = Self::VendorSpecific(val);
+                *self = Self::VendorSpecific(tmp);
             }
-            _ => return Err(Error::InvalidPPPoETag(tag_type)),
+            _ => return Err(Error::InvalidPPPoETag(*discriminant)),
         }
 
         Ok(())
     }
 }
-
-impl Serialize for Vec<PPPoETag> {
-    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        for tag in self {
-            tag.serialize(w)?;
-        }
-
-        Ok(())
-    }
-}
-
-impl Deserialize for Vec<PPPoETag> {
-    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        loop {
-            let mut tag = PPPoETag::None;
-            let result = tag.deserialize(r);
-
-            match result {
-                Ok(_) => {
-                    if let PPPoETag::EndOfList = tag {
-                        break;
-                    }
-
-                    self.push(tag);
-                }
-                Err(e) => {
-                    if let Error::Io(ref ioe) = e {
-                        if ioe.kind() == io::ErrorKind::UnexpectedEof {
-                            break;
-                        } else {
-                            return Err(e);
-                        }
-                    } else {
-                        return Err(e);
-                    }
-                }
-            }
-        }
-
-        Ok(())
-    }
-}*/
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum PPPoEPkt {
