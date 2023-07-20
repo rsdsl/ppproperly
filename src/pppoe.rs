@@ -372,7 +372,7 @@ impl PPPoEPkt {
 
                 *self = Self::Padi(tmp);
             }
-            _ => {}
+            _ => return Err(Error::InvalidPPPoECode(*discriminant)),
         }
 
         Ok(())
