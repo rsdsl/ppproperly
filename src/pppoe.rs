@@ -1,6 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize, VerType};
 
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Take, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
@@ -450,13 +450,13 @@ impl PPPoEPkt {
 
     fn deserialize_with_discriminant<R: Read>(
         &mut self,
-        r: &mut R,
-        discriminant: u8,
+        mut r: Take<&mut R>,
+        discriminant: &u8,
     ) -> Result<()> {
-        match discriminant {
+        match *discriminant {
             PADI => {
                 let mut tmp = PPPoEPADI::default();
-                tmp.deserialize(r)?;
+                tmp.deserialize(&mut r)?;
 
                 *self = Self::Padi(tmp);
             }
@@ -467,7 +467,7 @@ impl PPPoEPkt {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEFullPkt {
     dst_mac: MACAddr,
     src_mac: MACAddr,
@@ -477,6 +477,19 @@ pub struct PPPoEFullPkt {
     session_id: u16,
     #[ppproperly(len_for = "payload")]
     payload: PPPoEPkt,
+}
+
+impl PPPoEFullPkt {
+    pub fn new_padi(src_mac: MACAddr, tags: Vec<u8>) -> Self {
+        Self {
+            dst_mac: MACAddr::BROADCAST,
+            src_mac,
+            ether_type: EtherType::PPPoED,
+            ver_type: VerType::default(),
+            session_id: 0,
+            payload: PPPoEPkt::Padi(PPPoEPADI { tags }),
+        }
+    }
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
