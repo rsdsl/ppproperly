@@ -162,7 +162,7 @@ pub struct PPPoEHeader {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum PPPoETag {
+pub enum PPPoETagPayload {
     ACCookie(Vec<u8>),
     ACName(String),
     ACSystemError(String),
@@ -180,7 +180,7 @@ pub enum PPPoETag {
     VendorSpecific(Vec<u8>),
 }
 
-impl Serialize for PPPoETag {
+impl Serialize for PPPoETagPayload {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::ACCookie(payload) => payload.serialize(w),
@@ -202,7 +202,7 @@ impl Serialize for PPPoETag {
     }
 }
 
-impl PPPoETag {
+impl PPPoETagPayload {
     fn discriminant(&self) -> u16 {
         match *self {
             Self::ACCookie(_) => TAG_AC_COOKIE,
@@ -243,7 +243,7 @@ impl PPPoETag {
         }
     }
 
-    fn deserialize_with_discriminant16<R: Read>(
+    fn deserialize_with_discriminant<R: Read>(
         &mut self,
         mut r: Take<&mut R>,
         discriminant: &u16,
@@ -328,6 +328,54 @@ impl PPPoETag {
     }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoETag {
+    #[ppproperly(discriminant_for(field = "payload", data_type = "u16"))]
+    #[ppproperly(len_for = "payload")]
+    payload: PPPoETagPayload,
+}
+
+impl From<PPPoETagPayload> for PPPoETag {
+    fn from(payload: PPPoETagPayload) -> Self {
+        Self { payload }
+    }
+}
+
+impl Serialize for [PPPoETag] {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        for tag in self {
+            tag.serialize(w)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Deserialize for Vec<PPPoETag> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        loop {
+            let mut tmp = PPPoETag::from(PPPoETagPayload::EndOfList);
+
+            match tmp.deserialize(r) {
+                Ok(_) => self.push(tmp),
+                Err(e) => {
+                    if let Error::Io(ref ioe) = e {
+                        if ioe.kind() == io::ErrorKind::UnexpectedEof {
+                            break;
+                        } else {
+                            return Err(e);
+                        }
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum PPPoEPkt {
     Padi(PPPoEPADI),
@@ -385,14 +433,14 @@ pub struct PPPoEFullPkt {
     src_mac: MACAddr,
     ether_type: EtherType,
     ver_type: VerType,
-    #[ppproperly(discriminant_for = "payload")]
+    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
     session_id: u16,
     #[ppproperly(len_for = "payload")]
     payload: PPPoEPkt,
 }
 
 impl PPPoEFullPkt {
-    pub fn new_padi(src_mac: MACAddr, tags: Vec<u8>) -> Self {
+    pub fn new_padi(src_mac: MACAddr, tags: Vec<PPPoETag>) -> Self {
         Self {
             dst_mac: MACAddr::BROADCAST,
             src_mac,
@@ -406,7 +454,7 @@ impl PPPoEFullPkt {
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADI {
-    pub tags: Vec<u8>,
+    pub tags: Vec<PPPoETag>,
 }
 
 impl PPPoEPADI {
