@@ -459,7 +459,15 @@ pub struct PPPoEPADI {
 
 impl PPPoEPADI {
     pub fn len(&self) -> u16 {
-        self.tags.len().try_into().unwrap()
+        self.tags
+            .iter()
+            .map(|tag| tag.payload.len())
+            .reduce(|acc, n| acc + n)
+            .unwrap_or(0)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.tags.is_empty()
     }
 }
 
