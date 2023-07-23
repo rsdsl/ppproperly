@@ -335,6 +335,16 @@ pub struct PPPoETag {
     payload: PPPoETagPayload,
 }
 
+impl PPPoETag {
+    pub fn len(&self) -> u16 {
+        4 + self.payload.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 4
+    }
+}
+
 impl From<PPPoETagPayload> for PPPoETag {
     fn from(payload: PPPoETagPayload) -> Self {
         Self { payload }
@@ -461,7 +471,7 @@ impl PPPoEPADI {
     pub fn len(&self) -> u16 {
         self.tags
             .iter()
-            .map(|tag| tag.payload.len())
+            .map(|tag| tag.len())
             .reduce(|acc, n| acc + n)
             .unwrap_or(0)
     }
