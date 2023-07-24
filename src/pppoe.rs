@@ -184,19 +184,19 @@ impl Serialize for PPPoETagPayload {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::ACCookie(payload) => payload.serialize(w),
-            Self::ACName(payload) => payload.as_str().serialize(w),
-            Self::ACSystemError(payload) => payload.as_str().serialize(w),
+            Self::ACName(payload) => payload.as_bytes().serialize(w),
+            Self::ACSystemError(payload) => payload.as_bytes().serialize(w),
             Self::Credits => Ok(()),
             Self::CreditScaleFactor => Ok(()),
             Self::EndOfList => Ok(()),
-            Self::GenericError(payload) => payload.as_str().serialize(w),
+            Self::GenericError(payload) => payload.as_bytes().serialize(w),
             Self::HostUniq(payload) => payload.serialize(w),
             Self::Metrics => Ok(()),
             Self::PPPMaxPayload => Ok(()),
             Self::RelaySessionID(payload) => payload.serialize(w),
             Self::SequenceNumber => Ok(()),
-            Self::ServiceName(payload) => payload.as_str().serialize(w),
-            Self::ServiceNameError(payload) => payload.as_str().serialize(w),
+            Self::ServiceName(payload) => payload.as_bytes().serialize(w),
+            Self::ServiceNameError(payload) => payload.as_bytes().serialize(w),
             Self::VendorSpecific(payload) => payload.serialize(w),
         }
     }
@@ -250,22 +250,22 @@ impl PPPoETagPayload {
     ) -> Result<()> {
         match *discriminant {
             TAG_AC_COOKIE => {
-                let mut tmp = vec![];
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
                 *self = Self::ACCookie(tmp);
             }
             TAG_AC_NAME => {
-                let mut tmp = String::default();
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
-                *self = Self::ACName(tmp);
+                *self = Self::ACName(String::from_utf8(tmp)?);
             }
             TAG_AC_SYSTEM_ERROR => {
-                let mut tmp = String::default();
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
-                *self = Self::ACSystemError(tmp);
+                *self = Self::ACSystemError(String::from_utf8(tmp)?);
             }
             TAG_CREDITS => {
                 *self = Self::Credits;
@@ -277,10 +277,10 @@ impl PPPoETagPayload {
                 *self = Self::EndOfList;
             }
             TAG_GENERIC_ERROR => {
-                let mut tmp = String::default();
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
-                *self = Self::GenericError(tmp);
+                *self = Self::GenericError(String::from_utf8(tmp)?);
             }
             TAG_HOST_UNIQ => {
                 let mut tmp = Vec::default();
@@ -304,16 +304,16 @@ impl PPPoETagPayload {
                 *self = Self::SequenceNumber;
             }
             TAG_SERVICE_NAME => {
-                let mut tmp = String::default();
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
-                *self = Self::ServiceName(tmp);
+                *self = Self::ServiceName(String::from_utf8(tmp)?);
             }
             TAG_SERVICE_NAME_ERROR => {
-                let mut tmp = String::default();
+                let mut tmp = Vec::default();
                 tmp.deserialize(&mut r)?;
 
-                *self = Self::ServiceNameError(tmp);
+                *self = Self::ServiceNameError(String::from_utf8(tmp)?);
             }
             TAG_VENDOR_SPECIFIC => {
                 let mut tmp = Vec::default();
