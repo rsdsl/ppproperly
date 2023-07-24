@@ -1,8 +1,7 @@
 use crate::{Deserialize, Error, Result, Serialize, VerType};
 
-use std::io::{Read, Seek, SeekFrom, Take, Write};
+use std::io::{Read, Take, Write};
 
-use peekread::PeekRead;
 use ppproperly_macros::{Deserialize, Serialize};
 
 const ETHER_TYPE_PPPOED: u16 = 0x8863;
@@ -53,7 +52,7 @@ impl Serialize for MACAddr {
 }
 
 impl Deserialize for MACAddr {
-    fn deserialize<R: Read + PeekRead>(&mut self, r: &mut R) -> Result<()> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         let mut buf = Vec::new();
         buf.deserialize(&mut r.take(6))?;
 
@@ -94,7 +93,7 @@ impl Serialize for EtherType {
 }
 
 impl Deserialize for EtherType {
-    fn deserialize<R: Read + PeekRead>(&mut self, r: &mut R) -> Result<()> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         let mut ether_type = 0u16;
         ether_type.deserialize(r)?;
 
@@ -142,7 +141,7 @@ impl Serialize for PPPoECode {
 }
 
 impl Deserialize for PPPoECode {
-    fn deserialize<R: Read + PeekRead>(&mut self, r: &mut R) -> Result<()> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         let mut code = 0u8;
         code.deserialize(r)?;
 
@@ -244,7 +243,7 @@ impl PPPoETagPayload {
         }
     }
 
-    fn deserialize_with_discriminant<R: Read + PeekRead>(
+    fn deserialize_with_discriminant<R: Read>(
         &mut self,
         mut r: Take<&mut R>,
         discriminant: &u16,
@@ -363,8 +362,8 @@ impl Serialize for [PPPoETag] {
 }
 
 impl Deserialize for Vec<PPPoETag> {
-    fn deserialize<R: Read + PeekRead>(&mut self, r: &mut R) -> Result<()> {
-        while r.peek().seek(SeekFrom::End(0))? > 0 {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        while r.bytes().count() > 0 {
             let mut tmp = PPPoETag::from(PPPoETagPayload::EndOfList);
 
             tmp.deserialize(r)?;
@@ -407,7 +406,7 @@ impl PPPoEPkt {
         }
     }
 
-    fn deserialize_with_discriminant<R: Read + PeekRead>(
+    fn deserialize_with_discriminant<R: Read>(
         &mut self,
         mut r: Take<&mut R>,
         discriminant: &u8,

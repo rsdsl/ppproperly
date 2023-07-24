@@ -3,7 +3,6 @@ use crate::{Deserialize, Result, Serialize};
 use std::io::{Read, Write};
 
 use bitfield::bitfield;
-use peekread::PeekRead;
 
 bitfield! {
     /// Version and type of a PPPoE header combined in a single octet.
@@ -30,7 +29,7 @@ impl Serialize for VerType {
 }
 
 impl Deserialize for VerType {
-    fn deserialize<R: Read + PeekRead>(&mut self, r: &mut R) -> Result<()> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         self.0.deserialize(r)
     }
 }
