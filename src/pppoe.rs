@@ -380,6 +380,7 @@ pub enum PPPoEPkt {
     Pado(PPPoEPADO),
     Padr(PPPoEPADR),
     Pads(PPPoEPADS),
+    Padt(PPPoEPADT),
 }
 
 impl Default for PPPoEPkt {
@@ -395,6 +396,7 @@ impl Serialize for PPPoEPkt {
             Self::Pado(payload) => payload.serialize(w),
             Self::Padr(payload) => payload.serialize(w),
             Self::Pads(payload) => payload.serialize(w),
+            Self::Padt(payload) => payload.serialize(w),
         }
     }
 }
@@ -406,6 +408,7 @@ impl PPPoEPkt {
             Self::Pado(_) => PADO,
             Self::Padr(_) => PADR,
             Self::Pads(_) => PADS,
+            Self::Padt(_) => PADT,
         }
     }
 
@@ -415,6 +418,7 @@ impl PPPoEPkt {
             Self::Pado(payload) => payload.len(),
             Self::Padr(payload) => payload.len(),
             Self::Pads(payload) => payload.len(),
+            Self::Padt(payload) => payload.len(),
         }
     }
 
@@ -447,6 +451,12 @@ impl PPPoEPkt {
                 tmp.deserialize(&mut r)?;
 
                 *self = Self::Pads(tmp);
+            }
+            PADT => {
+                let mut tmp = PPPoEPADT::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::Padt(tmp);
             }
             _ => return Err(Error::InvalidPPPoECode(*discriminant)),
         }
@@ -516,6 +526,22 @@ impl PPPoEFullPkt {
             payload: PPPoEPkt::Pads(PPPoEPADS { tags }),
         }
     }
+
+    pub fn new_padt(
+        dst_mac: MACAddr,
+        src_mac: MACAddr,
+        session_id: u16,
+        tags: Vec<PPPoETag>,
+    ) -> Self {
+        Self {
+            dst_mac,
+            src_mac,
+            ether_type: EtherType::PPPoED,
+            ver_type: VerType::default(),
+            session_id,
+            payload: PPPoEPkt::Padt(PPPoEPADT { tags }),
+        }
+    }
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
@@ -581,6 +607,25 @@ pub struct PPPoEPADS {
 }
 
 impl PPPoEPADS {
+    pub fn len(&self) -> u16 {
+        self.tags
+            .iter()
+            .map(|tag| tag.len())
+            .reduce(|acc, n| acc + n)
+            .unwrap_or(0)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.tags.is_empty()
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPoEPADT {
+    pub tags: Vec<PPPoETag>,
+}
+
+impl PPPoEPADT {
     pub fn len(&self) -> u16 {
         self.tags
             .iter()
