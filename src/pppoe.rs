@@ -363,7 +363,7 @@ impl Serialize for [PPPoETag] {
 
 impl Deserialize for Vec<PPPoETag> {
     fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        while r.bytes().count() > 0 {
+        while r.bytes().size_hint().0 > 0 {
             let mut tmp = PPPoETag::from(PPPoETagPayload::EndOfList);
 
             tmp.deserialize(r)?;
