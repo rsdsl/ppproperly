@@ -1,6 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize, VerType};
 
-use std::io::{self, Read, Take, Write};
+use std::io::{Read, Take, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
@@ -363,23 +363,11 @@ impl Serialize for [PPPoETag] {
 
 impl Deserialize for Vec<PPPoETag> {
     fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        loop {
+        while r.bytes().count() > 0 {
             let mut tmp = PPPoETag::from(PPPoETagPayload::EndOfList);
 
-            match tmp.deserialize(r) {
-                Ok(_) => self.push(tmp),
-                Err(e) => {
-                    if let Error::Io(ref ioe) = e {
-                        if ioe.kind() == io::ErrorKind::UnexpectedEof {
-                            break;
-                        } else {
-                            return Err(e);
-                        }
-                    } else {
-                        return Err(e);
-                    }
-                }
-            }
+            tmp.deserialize(r)?;
+            self.push(tmp);
         }
 
         Ok(())
