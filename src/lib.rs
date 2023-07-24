@@ -249,16 +249,16 @@ mod tests {
         Ok(())
     }
 
-    /*#[test]
+    #[test]
     fn test_serialize_pppoe_pado() -> Result<()> {
-        let pado = PPPoEPADOPkt::new(
+        let pado = PPPoEFullPkt::new_pado(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             vec![
-                PPPoETag::ACName("isp_ac".into()),
-                PPPoETag::ServiceName("isp_svc".into()),
+                PPPoETagPayload::ACName("isp_ac".into()).into(),
+                PPPoETagPayload::ServiceName("isp_svc".into()).into(),
             ],
-        )?;
+        );
 
         let mut buf = Vec::new();
         pado.serialize(&mut buf)?;
@@ -275,6 +275,31 @@ mod tests {
     }
 
     #[test]
+    fn test_deserialize_pppoe_pado() -> Result<()> {
+        let mut pado = PPPoEFullPkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
+            0x11, 0x07, 0x00, 0x00, 0x00, 0x15, 0x01, 0x02, 0x00, 0x06, 0x69, 0x73, 0x70, 0x5f,
+            0x61, 0x63, 0x01, 0x01, 0x00, 0x07, 0x69, 0x73, 0x70, 0x5f, 0x73, 0x76, 0x63,
+        ];
+        pado.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            pado,
+            PPPoEFullPkt::new_pado(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                vec![
+                    PPPoETagPayload::ACName("isp_ac".into()).into(),
+                    PPPoETagPayload::ServiceName("isp_svc".into()).into()
+                ]
+            )
+        );
+        Ok(())
+    }
+
+    /*#[test]
     fn test_deserialize_pppoe_pado() -> Result<()> {
         let mut pado = PPPoEPADOPkt::default();
 
