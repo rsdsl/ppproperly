@@ -7,6 +7,9 @@ pub use error::*;
 pub mod lcp;
 pub use lcp::*;
 
+pub mod ppp;
+pub use ppp::*;
+
 pub mod pppoe;
 pub use pppoe::*;
 

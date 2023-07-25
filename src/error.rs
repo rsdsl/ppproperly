@@ -27,6 +27,14 @@ pub enum Error {
     #[error("invalid LCP option type: {0}")]
     InvalidLCPOptionType(u8),
 
+    #[error("invalid authentication protocol: {0}")]
+    InvalidAuthProtocol(u16),
+    #[error("invalid quality protocol: {0}")]
+    InvalidQualityProtocol(u16),
+
+    #[error("invalid CHAP algorithm: {0}")]
+    InvalidChapAlgorithm(u8),
+
     #[error("conversion from UTF-8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]

@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, Result, Serialize};
+use crate::{AuthProtocolInfo, Deserialize, Error, QualityProtocolInfo, Result, Serialize};
 
 use std::io::{Read, Take, Write};
 
@@ -51,7 +51,7 @@ impl LCPOptionPayload {
         match *self {
             Self::MRU(_) => OPT_MRU,
             Self::AuthenticationProtocol(_) => OPT_AUTHENTICATION_PROTOCOL,
-            Self::QualityProtool(_) => OPT_QUALITY_PROTOCOL,
+            Self::QualityProtocol(_) => OPT_QUALITY_PROTOCOL,
             Self::MagicNumber(_) => OPT_MAGIC_NUMBER,
             Self::ProtocolFieldCompression => OPT_PROTOCOL_FIELD_COMPRESSION,
             Self::AddrCtlFieldCompression => OPT_ADDR_CTL_FIELD_COMPRESSION,
@@ -61,8 +61,8 @@ impl LCPOptionPayload {
     fn len(&self) -> u8 {
         match *self {
             Self::MRU(_) => 2,
-            Self::AuthenticationProtocol(payload) => payload.len(),
-            Self::QualityProtocol(payload) => payload.len(),
+            Self::AuthenticationProtocol(ref payload) => payload.len(),
+            Self::QualityProtocol(ref payload) => payload.len(),
             Self::MagicNumber(_) => 4,
             Self::ProtocolFieldCompression => 0,
             Self::AddrCtlFieldCompression => 0,
