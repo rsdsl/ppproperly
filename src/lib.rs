@@ -1046,8 +1046,8 @@ mod tests {
             1,
             PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_request(
                 0x41,
-                PAPString("foo".into()),
-                PAPString("bar".into()),
+                "foo".into(),
+                "bar".into(),
             )),
         );
 
@@ -1059,7 +1059,7 @@ mod tests {
             &[
                 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
                 0x11, 0x00, 0x00, 0x01, 0x00, 0x0e, 0xc0, 0x23, 0x01, 0x41, 0x00, 0x0c, 0x03, 0x66,
-                0x70, 0x70, 0x03, 0x62, 0x61, 0x72
+                0x6f, 0x6f, 0x03, 0x62, 0x61, 0x72
             ]
         );
         Ok(())
@@ -1072,7 +1072,7 @@ mod tests {
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
             0x11, 0x00, 0x00, 0x01, 0x00, 0x0e, 0xc0, 0x23, 0x01, 0x41, 0x00, 0x0c, 0x03, 0x66,
-            0x70, 0x70, 0x03, 0x62, 0x61, 0x72,
+            0x6f, 0x6f, 0x03, 0x62, 0x61, 0x72,
         ];
         authenticate_request.deserialize(&mut buf.as_ref())?;
 
@@ -1084,8 +1084,8 @@ mod tests {
                 1,
                 PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_request(
                     0x41,
-                    PAPString("foo".into()),
-                    PAPString("bar".into())
+                    "foo".into(),
+                    "bar".into()
                 ))
             )
         );
@@ -1098,10 +1098,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(
-                0x41,
-                PAPString("ok".into()),
-            )),
+            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(0x41, "ok".into())),
         );
 
         let mut buf = Vec::new();
@@ -1135,10 +1132,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(
-                    0x41,
-                    PAPString("ok".into())
-                ))
+                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(0x41, "ok".into()))
             )
         );
         Ok(())
@@ -1150,10 +1144,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(
-                0x41,
-                PAPString("no".into()),
-            )),
+            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(0x41, "no".into())),
         );
 
         let mut buf = Vec::new();
@@ -1187,10 +1178,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(
-                    0x41,
-                    PAPString("no".into())
-                ))
+                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(0x41, "no".into()))
             )
         );
         Ok(())
