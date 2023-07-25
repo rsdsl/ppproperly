@@ -376,3 +376,23 @@ impl LCPConfigureNak {
         self.options.is_empty()
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPConfigureReject {
+    options: Vec<LCPOption>,
+}
+
+impl LCPConfigureReject {
+    pub fn len(&self) -> u16 {
+        self.options
+            .iter()
+            .map(|option| option.len())
+            .reduce(|acc, n| acc + n)
+            .unwrap_or(0)
+            .into()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.options.is_empty()
+    }
+}
