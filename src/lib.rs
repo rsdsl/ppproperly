@@ -859,4 +859,31 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_lcp_protocol_reject() -> Result<()> {
+        let mut protocol_reject = PPPoEFullPkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+            0x11, 0x00, 0x00, 0x01, 0x00, 0x0a, 0xc0, 0x21, 0x08, 0x41, 0x00, 0x08, 0x13, 0x37,
+            0x41, 0x41,
+        ];
+        protocol_reject.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            protocol_reject,
+            PPPoEFullPkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                1,
+                PPPFullPkt::new_lcp(LCPFullPkt::new_protocol_reject(
+                    0x41,
+                    0x1337,
+                    vec![0x41, 0x41]
+                ))
+            )
+        );
+        Ok(())
+    }
 }
