@@ -473,3 +473,19 @@ impl LCPEchoRequest {
         self.len() == 4
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPEchoReply {
+    magic: u32,
+    data: Vec<u8>,
+}
+
+impl LCPEchoReply {
+    pub fn len(&self) -> u16 {
+        4 + self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 4
+    }
+}
