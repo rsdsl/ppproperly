@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, Result, Serialize, VerType};
+use crate::{Deserialize, Error, PPPFullPkt, Result, Serialize, VerType};
 
 use std::io::{Read, Take, Write};
 
@@ -7,7 +7,7 @@ use ppproperly_macros::{Deserialize, Serialize};
 const ETHER_TYPE_PPPOED: u16 = 0x8863;
 const ETHER_TYPE_PPPOES: u16 = 0x8864;
 
-const PASP: u8 = 0x00; // PPPoE Active Session PPP Packet
+const PPP: u8 = 0x00; // PPPoE Active Session PPP Packet
 const PADI: u8 = 0x09;
 const PADO: u8 = 0x07;
 const PADR: u8 = 0x19;
@@ -105,7 +105,7 @@ impl Deserialize for EtherType {
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PPPoECode {
-    PPP = PASP,
+    Ppp = PPP,
     Padi = PADI,
     Pado = PADO,
     Padr = PADR,
@@ -115,7 +115,7 @@ pub enum PPPoECode {
 
 impl Default for PPPoECode {
     fn default() -> Self {
-        Self::PPP
+        Self::Ppp
     }
 }
 
@@ -124,6 +124,7 @@ impl TryFrom<u8> for PPPoECode {
 
     fn try_from(code: u8) -> Result<Self> {
         match code {
+            PPP => Ok(Self::Ppp),
             PADI => Ok(Self::Padi),
             PADO => Ok(Self::Pado),
             PADR => Ok(Self::Padr),
@@ -376,6 +377,7 @@ impl Deserialize for Vec<PPPoETag> {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum PPPoEPkt {
+    Ppp(PPPFullPkt),
     Padi(PPPoEPADI),
     Pado(PPPoEPADO),
     Padr(PPPoEPADR),
@@ -392,6 +394,7 @@ impl Default for PPPoEPkt {
 impl Serialize for PPPoEPkt {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
+            Self::Ppp(payload) => payload.serialize(w),
             Self::Padi(payload) => payload.serialize(w),
             Self::Pado(payload) => payload.serialize(w),
             Self::Padr(payload) => payload.serialize(w),
@@ -404,6 +407,7 @@ impl Serialize for PPPoEPkt {
 impl PPPoEPkt {
     fn discriminant(&self) -> u8 {
         match self {
+            Self::Ppp(_) => PPP,
             Self::Padi(_) => PADI,
             Self::Pado(_) => PADO,
             Self::Padr(_) => PADR,
@@ -414,6 +418,7 @@ impl PPPoEPkt {
 
     fn len(&self) -> u16 {
         match self {
+            Self::Ppp(payload) => payload.len(),
             Self::Padi(payload) => payload.len(),
             Self::Pado(payload) => payload.len(),
             Self::Padr(payload) => payload.len(),
@@ -428,6 +433,12 @@ impl PPPoEPkt {
         discriminant: &u8,
     ) -> Result<()> {
         match *discriminant {
+            PPP => {
+                let mut tmp = PPPFullPkt::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::Ppp(tmp);
+            }
             PADI => {
                 let mut tmp = PPPoEPADI::default();
                 tmp.deserialize(&mut r)?;
@@ -540,6 +551,17 @@ impl PPPoEFullPkt {
             ver_type: VerType::default(),
             session_id,
             payload: PPPoEPkt::Padt(PPPoEPADT { tags }),
+        }
+    }
+
+    pub fn new_ppp(dst_mac: MACAddr, src_mac: MACAddr, session_id: u16, pkt: PPPFullPkt) -> Self {
+        Self {
+            dst_mac,
+            src_mac,
+            ether_type: EtherType::PPPoES,
+            ver_type: VerType::default(),
+            session_id,
+            payload: PPPoEPkt::Ppp(pkt),
         }
     }
 }
