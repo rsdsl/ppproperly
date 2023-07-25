@@ -36,3 +36,9 @@ impl Serialize for &str {
         Ok(())
     }
 }
+
+impl Serialize for String {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        self.as_str().serialize(w)
+    }
+}
