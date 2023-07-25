@@ -8,31 +8,6 @@ const PAP_AUTH_REQUEST: u8 = 1;
 const PAP_AUTH_ACK: u8 = 2;
 const PAP_AUTH_NAK: u8 = 3;
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct PAPString(pub String);
-
-impl Serialize for PAPString {
-    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        self.0.as_str().serialize(w)
-    }
-}
-
-impl Deserialize for PAPString {
-    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        self.0.deserialize(r)
-    }
-}
-
-impl PAPString {
-    pub fn len(&self) -> u8 {
-        self.0.len().try_into().unwrap()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PAPPkt {
     AuthenticateRequest(PAPAuthenticateRequest),
@@ -116,28 +91,21 @@ impl PAPFullPkt {
     pub fn new_authenticate_request(identifier: u8, peer_id: String, passwd: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateRequest(PAPAuthenticateRequest {
-                peer_id: PAPString(peer_id),
-                passwd: PAPString(passwd),
-            }),
+            payload: PAPPkt::AuthenticateRequest(PAPAuthenticateRequest { peer_id, passwd }),
         }
     }
 
     pub fn new_authenticate_ack(identifier: u8, msg: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateAck(PAPAuthenticateAck {
-                msg: PAPString(msg),
-            }),
+            payload: PAPPkt::AuthenticateAck(PAPAuthenticateAck { msg }),
         }
     }
 
     pub fn new_authenticate_nak(identifier: u8, msg: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateNak(PAPAuthenticateNak {
-                msg: PAPString(msg),
-            }),
+            payload: PAPPkt::AuthenticateNak(PAPAuthenticateNak { msg }),
         }
     }
 
@@ -152,15 +120,15 @@ impl PAPFullPkt {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PAPAuthenticateRequest {
-    #[ppproperly(len_for(field = "peer_id", offset = 0, data_type = "u8"))]
-    peer_id: PAPString,
-    #[ppproperly(len_for(field = "passwd", offset = 0, data_type = "u8"))]
-    passwd: PAPString,
+    peer_id: String,
+    passwd: String,
 }
 
 impl PAPAuthenticateRequest {
     pub fn len(&self) -> u16 {
-        (2 + self.peer_id.len() + self.passwd.len()).into()
+        (2 + self.peer_id.len() + self.passwd.len())
+            .try_into()
+            .unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -170,13 +138,12 @@ impl PAPAuthenticateRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PAPAuthenticateAck {
-    #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
-    msg: PAPString,
+    msg: String,
 }
 
 impl PAPAuthenticateAck {
     pub fn len(&self) -> u16 {
-        (1 + self.msg.len()).into()
+        (1 + self.msg.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -186,13 +153,12 @@ impl PAPAuthenticateAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PAPAuthenticateNak {
-    #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
-    msg: PAPString,
+    msg: String,
 }
 
 impl PAPAuthenticateNak {
     pub fn len(&self) -> u16 {
-        (1 + self.msg.len()).into()
+        (1 + self.msg.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
