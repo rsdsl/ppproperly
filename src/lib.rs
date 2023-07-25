@@ -724,4 +724,26 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_lcp_terminate_request() -> Result<()> {
+        let mut terminate_request = PPPoEFullPkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+            0x11, 0x00, 0x00, 0x01, 0x00, 0x08, 0xc0, 0x21, 0x05, 0x41, 0x00, 0x06, 0x41, 0x41,
+        ];
+        terminate_request.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            terminate_request,
+            PPPoEFullPkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                1,
+                PPPFullPkt::new_lcp(LCPFullPkt::new_terminate_request(0x41, vec![0x41, 0x41]))
+            )
+        );
+        Ok(())
+    }
 }
