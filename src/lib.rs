@@ -978,4 +978,31 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_lcp_discard_request() -> Result<()> {
+        let discard_request = PPPoEFullPkt::new_ppp(
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            1,
+            PPPFullPkt::new_lcp(LCPFullPkt::new_discard_request(
+                0x41,
+                0x1337,
+                vec![0x41, 0x41],
+            )),
+        );
+
+        let mut buf = Vec::new();
+        discard_request.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+                0x11, 0x00, 0x00, 0x01, 0x00, 0x0a, 0xc0, 0x21, 0x0b, 0x41, 0x00, 0x08, 0x13, 0x37,
+                0x41, 0x41
+            ]
+        );
+        Ok(())
+    }
 }
