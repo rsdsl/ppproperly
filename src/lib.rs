@@ -438,4 +438,37 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_lcp_configure_request() -> Result<()> {
+        let configure_request = PPPoEFullPkt::new_ppp(
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            1,
+            PPPFullPkt::new_lcp(LCPFullPkt::new_configure_request(
+                0x41,
+                vec![
+                    LCPOptionPayload::MRU(1492).into(),
+                    LCPOptionPayload::AuthenticationProtocol(
+                        AuthProtocol::Chap(ChapAlgorithm::Md5).into(),
+                    )
+                    .into(),
+                    LCPOptionPayload::MagicNumber(1337).into(),
+                ],
+            )),
+        );
+
+        let mut buf = Vec::new();
+        configure_request.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+                0x11, 0x00, 0x00, 0x01, 0x00, 0x15, 0xc0, 0x21, 0x01, 0x41, 0x00, 0x13, 0x01, 0x04,
+                0x05, 0xd4, 0x03, 0x05, 0xc2, 0x23, 0x05, 0x05, 0x06, 0x00, 0x00, 0x05, 0x39
+            ]
+        );
+        Ok(())
+    }
 }
