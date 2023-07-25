@@ -16,6 +16,148 @@ const LCP_ECHO_REQUEST: u8 = 9;
 const LCP_ECHO_REPLY: u8 = 10;
 const LCP_DISCARD_REQUEST: u8 = 11;
 
+const OPT_MRU: u8 = 1;
+const OPT_AUTHENTICATION_PROTOCOL: u8 = 3;
+const OPT_QUALITY_PROTOCOL: u8 = 4;
+const OPT_MAGIC_NUMBER: u8 = 5;
+const OPT_PROTOCOL_FIELD_COMPRESSION: u8 = 7;
+const OPT_ADDR_CTL_FIELD_COMPRESSION: u8 = 8;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LCPOptionPayload {
+    MRU(u16),
+    AuthenticationProtocol(AuthProtocolInfo),
+    QualityProtocol(QualityProtocolInfo),
+    MagicNumber(u32),
+    ProtocolFieldCompression,
+    AddrCtlFieldCompression,
+}
+
+impl Serialize for LCPOptionPayload {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        match self {
+            Self::MRU(payload) => payload.serialize(w),
+            Self::AuthenticationProtocol(payload) => payload.serialize(w),
+            Self::QualityProtocol(payload) => payload.serialize(w),
+            Self::MagicNumber(payload) => payload.serialize(w),
+            Self::ProtocolFieldCompression => Ok(()),
+            Self::AddrCtlFieldCompression => Ok(()),
+        }
+    }
+}
+
+impl LCPOptionPayload {
+    fn discriminant(&self) -> u8 {
+        match *self {
+            Self::MRU(_) => OPT_MRU,
+            Self::AuthenticationProtocol(_) => OPT_AUTHENTICATION_PROTOCOL,
+            Self::QualityProtool(_) => OPT_QUALITY_PROTOCOL,
+            Self::MagicNumber(_) => OPT_MAGIC_NUMBER,
+            Self::ProtocolFieldCompression => OPT_PROTOCOL_FIELD_COMPRESSION,
+            Self::AddrCtlFieldCompression => OPT_ADDR_CTL_FIELD_COMPRESSION,
+        }
+    }
+
+    fn len(&self) -> u8 {
+        match *self {
+            Self::MRU(_) => 2,
+            Self::AuthenticationProtocol(payload) => payload.len(),
+            Self::QualityProtocol(payload) => payload.len(),
+            Self::MagicNumber(_) => 4,
+            Self::ProtocolFieldCompression => 0,
+            Self::AddrCtlFieldCompression => 0,
+        }
+    }
+
+    fn deserialize_with_discriminant<R: Read>(
+        &mut self,
+        mut r: Take<&mut R>,
+        discriminant: &u8,
+    ) -> Result<()> {
+        match *discriminant {
+            OPT_MRU => {
+                let mut tmp = u16::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::MRU(tmp);
+            }
+            OPT_AUTHENTICATION_PROTOCOL => {
+                let mut tmp = AuthProtocolInfo::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::AuthenticationProtocol(tmp);
+            }
+            OPT_QUALITY_PROTOCOL => {
+                let mut tmp = QualityProtocolInfo::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::QualityProtocol(tmp);
+            }
+            OPT_MAGIC_NUMBER => {
+                let mut tmp = u32::default();
+                tmp.deserialize(&mut r)?;
+
+                *self = Self::MagicNumber(tmp);
+            }
+            OPT_PROTOCOL_FIELD_COMPRESSION => {
+                *self = Self::ProtocolFieldCompression;
+            }
+            OPT_ADDR_CTL_FIELD_COMPRESSION => {
+                *self = Self::AddrCtlFieldCompression;
+            }
+            _ => return Err(Error::InvalidLCPOptionType(*discriminant)),
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPOption {
+    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
+    #[ppproperly(len_for(field = "payload", offset = 2, data_type = "u8"))]
+    payload: LCPOptionPayload,
+}
+
+impl LCPOption {
+    pub fn len(&self) -> u8 {
+        4 + self.payload.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 4
+    }
+}
+
+impl From<LCPOptionPayload> for LCPOption {
+    fn from(payload: LCPOptionPayload) -> Self {
+        Self { payload }
+    }
+}
+
+impl Serialize for [LCPOption] {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        for option in self {
+            option.serialize(w)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Deserialize for Vec<LCPOption> {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        while r.bytes().size_hint().0 > 0 {
+            let mut tmp = LCPOption::from(LCPOptionPayload::MagicNumber(0));
+
+            tmp.deserialize(r)?;
+            self.push(tmp);
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum LCPPkt {
     ConfigureRequest(LCPConfigureRequest),
@@ -171,6 +313,26 @@ impl LCPPkt {
 pub struct LCPFullPkt {
     #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
     identifier: u8,
-    #[ppproperly(len_for(field = "payload", offset = 4))]
+    #[ppproperly(len_for(field = "payload", offset = 4, data_type = "u16"))]
     payload: LCPPkt,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPConfigureRequest {
+    options: Vec<LCPOption>,
+}
+
+impl LCPConfigureRequest {
+    pub fn len(&self) -> u16 {
+        self.options
+            .iter()
+            .map(|option| option.len())
+            .reduce(|acc, n| acc + n)
+            .unwrap_or(0)
+            .into()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.options.is_empty()
+    }
 }

@@ -24,6 +24,8 @@ pub enum Error {
 
     #[error("invalid LCP code: {0}")]
     InvalidLCPCode(u8),
+    #[error("invalid LCP option type: {0}")]
+    InvalidLCPOptionType(u8),
 
     #[error("conversion from UTF-8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
