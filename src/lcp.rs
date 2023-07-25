@@ -426,3 +426,18 @@ impl LCPTerminateAck {
         self.data.is_empty()
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPCodeReject {
+    pkt: Vec<u8>, // Vec makes truncating easier without overwriting (de)ser impls.
+}
+
+impl LCPCodeReject {
+    pub fn len(&self) -> u16 {
+        self.pkt.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.pkt.is_empty()
+    }
+}
