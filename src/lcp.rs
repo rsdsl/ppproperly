@@ -332,6 +332,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_configure_nak(identifier: u8, options: Vec<LCPOption>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::ConfigureNak(LCPConfigureNak { options }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
