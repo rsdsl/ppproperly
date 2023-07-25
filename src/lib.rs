@@ -625,9 +625,9 @@ mod tests {
                     0x41,
                     vec![
                         LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(AuthProtocol::Chap(
-                            ChapAlgorithm::Md5
-                        ))
+                        LCPOptionPayload::AuthenticationProtocol(
+                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
+                        )
                         .into(),
                         LCPOptionPayload::MagicNumber(1337).into()
                     ]
@@ -691,9 +691,9 @@ mod tests {
                     0x41,
                     vec![
                         LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(AuthProtocol::Chap(
-                            ChapAlgorithm::Md5
-                        ))
+                        LCPOptionPayload::AuthenticationProtocol(
+                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
+                        )
                         .into(),
                         LCPOptionPayload::MagicNumber(1337).into()
                     ]
@@ -825,10 +825,12 @@ mod tests {
 
         assert_eq!(
             code_reject,
-            PPPoEFullPkt::new_ppp(PPPFullPkt::new_lcp(LCPFullPkt::new_code_reject(
-                0x41,
-                vec![0x41, 0x41]
-            )))
+            PPPoEFullPkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                1,
+                PPPFullPkt::new_lcp(LCPFullPkt::new_code_reject(0x41, vec![0x41, 0x41]))
+            )
         );
         Ok(())
     }
