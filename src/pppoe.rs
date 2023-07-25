@@ -252,20 +252,20 @@ impl PPPoETagPayload {
         match *discriminant {
             TAG_AC_COOKIE => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::ACCookie(tmp);
             }
             TAG_AC_NAME => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::ACName(String::from_utf8(tmp)?);
             }
             TAG_AC_SYSTEM_ERROR => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::ACSystemError(String::from_utf8(tmp)?);
             }
             TAG_CREDITS => {
@@ -279,14 +279,14 @@ impl PPPoETagPayload {
             }
             TAG_GENERIC_ERROR => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::GenericError(String::from_utf8(tmp)?);
             }
             TAG_HOST_UNIQ => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::HostUniq(tmp);
             }
             TAG_METRICS => {
@@ -297,8 +297,8 @@ impl PPPoETagPayload {
             }
             TAG_RELAY_SESSION_ID => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::RelaySessionID(tmp);
             }
             TAG_SEQUENCE_NUMBER => {
@@ -306,20 +306,20 @@ impl PPPoETagPayload {
             }
             TAG_SERVICE_NAME => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::ServiceName(String::from_utf8(tmp)?);
             }
             TAG_SERVICE_NAME_ERROR => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::ServiceNameError(String::from_utf8(tmp)?);
             }
             TAG_VENDOR_SPECIFIC => {
                 let mut tmp = Vec::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::VendorSpecific(tmp);
             }
             _ => return Err(Error::InvalidPPPoETag(*discriminant)),
@@ -435,38 +435,38 @@ impl PPPoEPkt {
         match *discriminant {
             PPP => {
                 let mut tmp = PPPFullPkt::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Ppp(tmp);
             }
             PADI => {
                 let mut tmp = PPPoEPADI::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Padi(tmp);
             }
             PADO => {
                 let mut tmp = PPPoEPADO::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Pado(tmp);
             }
             PADR => {
                 let mut tmp = PPPoEPADR::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Padr(tmp);
             }
             PADS => {
                 let mut tmp = PPPoEPADS::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Pads(tmp);
             }
             PADT => {
                 let mut tmp = PPPoEPADT::default();
-                tmp.deserialize(&mut r)?;
 
+                tmp.deserialize(&mut r)?;
                 *self = Self::Padt(tmp);
             }
             _ => return Err(Error::InvalidPPPoECode(*discriminant)),
