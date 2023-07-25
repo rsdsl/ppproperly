@@ -261,6 +261,12 @@ pub struct PPPFullPkt {
 }
 
 impl PPPFullPkt {
+    pub fn new_lcp(lcp: LCPFullPkt) -> Self {
+        Self {
+            payload: PPPPkt::Lcp(lcp),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         2 + self.payload.len()
     }

@@ -121,11 +121,11 @@ pub struct LCPOption {
 
 impl LCPOption {
     pub fn len(&self) -> u8 {
-        4 + self.payload.len()
+        2 + self.payload.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.len() == 4
+        self.len() == 2
     }
 }
 
@@ -318,6 +318,13 @@ pub struct LCPFullPkt {
 }
 
 impl LCPFullPkt {
+    pub fn new_configure_request(identifier: u8, options: Vec<LCPOption>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::ConfigureRequest(LCPConfigureRequest { options }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
