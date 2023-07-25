@@ -331,7 +331,7 @@ impl PPPoETagPayload {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoETag {
     #[ppproperly(discriminant_for(field = "payload", data_type = "u16"))]
-    #[ppproperly(len_for(field = "payload", offset = 0))]
+    #[ppproperly(len_for(field = "payload", offset = 0, data_type = "u16"))]
     payload: PPPoETagPayload,
 }
 
@@ -473,7 +473,7 @@ pub struct PPPoEFullPkt {
     ver_type: VerType,
     #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
     session_id: u16,
-    #[ppproperly(len_for(field = "payload", offset = 0))]
+    #[ppproperly(len_for(field = "payload", offset = 0, data_type = "u16"))]
     payload: PPPoEPkt,
 }
 
