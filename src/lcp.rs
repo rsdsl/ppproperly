@@ -339,6 +339,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_configure_reject(identifier: u8, options: Vec<LCPOption>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::ConfigureReject(LCPConfigureReject { options }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
