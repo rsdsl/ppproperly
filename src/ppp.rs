@@ -73,14 +73,14 @@ impl Serialize for AuthProtocol {
 
 impl AuthProtocol {
     fn discriminant(&self) -> u16 {
-        match *self {
+        match self {
             Self::Pap => PAP,
             Self::Chap(_) => CHAP,
         }
     }
 
     fn len(&self) -> u8 {
-        match *self {
+        match self {
             Self::Pap => 0,
             Self::Chap(_) => 1,
         }
@@ -151,13 +151,13 @@ impl Serialize for QualityProtocol {
 
 impl QualityProtocol {
     fn discriminant(&self) -> u16 {
-        match *self {
+        match self {
             Self::LinkQualityReport(_) => LQR,
         }
     }
 
     fn len(&self) -> u8 {
-        match *self {
+        match self {
             Self::LinkQualityReport(_) => 4,
         }
     }
@@ -224,7 +224,7 @@ impl Serialize for PPPPkt {
 
 impl PPPPkt {
     fn discriminant(&self) -> u16 {
-        match *self {
+        match self {
             Self::Lcp(_) => LCP,
         }
     }

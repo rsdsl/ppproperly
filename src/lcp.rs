@@ -48,7 +48,7 @@ impl Serialize for LCPOptionPayload {
 
 impl LCPOptionPayload {
     fn discriminant(&self) -> u8 {
-        match *self {
+        match self {
             Self::MRU(_) => OPT_MRU,
             Self::AuthenticationProtocol(_) => OPT_AUTHENTICATION_PROTOCOL,
             Self::QualityProtocol(_) => OPT_QUALITY_PROTOCOL,
@@ -59,10 +59,10 @@ impl LCPOptionPayload {
     }
 
     fn len(&self) -> u8 {
-        match *self {
+        match self {
             Self::MRU(_) => 2,
-            Self::AuthenticationProtocol(ref payload) => payload.len(),
-            Self::QualityProtocol(ref payload) => payload.len(),
+            Self::AuthenticationProtocol(payload) => payload.len(),
+            Self::QualityProtocol(payload) => payload.len(),
             Self::MagicNumber(_) => 4,
             Self::ProtocolFieldCompression => 0,
             Self::AddrCtlFieldCompression => 0,
@@ -199,7 +199,7 @@ impl Serialize for LCPPkt {
 
 impl LCPPkt {
     fn discriminant(&self) -> u8 {
-        match *self {
+        match self {
             Self::ConfigureRequest(_) => LCP_CONFIGURE_REQUEST,
             Self::ConfigureAck(_) => LCP_CONFIGURE_ACK,
             Self::ConfigureNak(_) => LCP_CONFIGURE_NAK,

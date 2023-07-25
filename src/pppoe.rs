@@ -204,7 +204,7 @@ impl Serialize for PPPoETagPayload {
 
 impl PPPoETagPayload {
     fn discriminant(&self) -> u16 {
-        match *self {
+        match self {
             Self::ACCookie(_) => TAG_AC_COOKIE,
             Self::ACName(_) => TAG_AC_NAME,
             Self::ACSystemError(_) => TAG_AC_SYSTEM_ERROR,
@@ -403,7 +403,7 @@ impl Serialize for PPPoEPkt {
 
 impl PPPoEPkt {
     fn discriminant(&self) -> u8 {
-        match *self {
+        match self {
             Self::Padi(_) => PADI,
             Self::Pado(_) => PADO,
             Self::Padr(_) => PADR,
