@@ -22,6 +22,9 @@ pub enum Error {
     #[error("PADI size exceeds 1484 bytes")]
     PADITooBig(u16),
 
+    #[error("invalid PPP protocol: {0}")]
+    InvalidPPPProtocol(u16),
+
     #[error("invalid LCP code: {0}")]
     InvalidLCPCode(u8),
     #[error("invalid LCP option type: {0}")]

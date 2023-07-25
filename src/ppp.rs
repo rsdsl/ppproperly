@@ -1,9 +1,10 @@
-use crate::{Deserialize, Error, Result, Serialize};
+use crate::{Deserialize, Error, LCPFullPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
+const LCP: u16 = 0xc021;
 const PAP: u16 = 0xc023;
 const CHAP: u16 = 0xc223;
 const LQR: u16 = 0xc025;
@@ -199,5 +200,72 @@ impl QualityProtocolInfo {
 impl From<QualityProtocol> for QualityProtocolInfo {
     fn from(protocol: QualityProtocol) -> Self {
         Self { protocol }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum PPPPkt {
+    Lcp(LCPFullPkt),
+}
+
+impl Default for PPPPkt {
+    fn default() -> Self {
+        Self::Lcp(LCPFullPkt::default())
+    }
+}
+
+impl Serialize for PPPPkt {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        match self {
+            Self::Lcp(payload) => payload.serialize(w),
+        }
+    }
+}
+
+impl PPPPkt {
+    fn discriminant(&self) -> u16 {
+        match *self {
+            Self::Lcp(_) => LCP,
+        }
+    }
+
+    fn len(&self) -> u16 {
+        match self {
+            Self::Lcp(payload) => payload.len(),
+        }
+    }
+
+    fn deserialize_with_discriminant<R: Read>(
+        &mut self,
+        r: &mut R,
+        discriminant: &u16,
+    ) -> Result<()> {
+        match *discriminant {
+            LCP => {
+                let mut tmp = LCPFullPkt::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::Lcp(tmp);
+            }
+            _ => return Err(Error::InvalidPPPProtocol(*discriminant)),
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct PPPFullPkt {
+    #[ppproperly(discriminant_for(field = "payload", data_type = "u16"))]
+    payload: PPPPkt,
+}
+
+impl PPPFullPkt {
+    pub fn len(&self) -> u16 {
+        2 + self.payload.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 2
     }
 }

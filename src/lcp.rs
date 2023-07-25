@@ -158,7 +158,7 @@ impl Deserialize for Vec<LCPOption> {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LCPPkt {
     ConfigureRequest(LCPConfigureRequest),
     ConfigureAck(LCPConfigureAck),
@@ -309,7 +309,7 @@ impl LCPPkt {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPFullPkt {
     #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
     identifier: u8,
@@ -317,7 +317,17 @@ pub struct LCPFullPkt {
     payload: LCPPkt,
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+impl LCPFullPkt {
+    pub fn len(&self) -> u16 {
+        4 + self.payload.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 4
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPConfigureRequest {
     options: Vec<LCPOption>,
 }
@@ -337,7 +347,7 @@ impl LCPConfigureRequest {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPConfigureAck {
     options: Vec<LCPOption>,
 }
@@ -357,7 +367,7 @@ impl LCPConfigureAck {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPConfigureNak {
     options: Vec<LCPOption>,
 }
@@ -377,7 +387,7 @@ impl LCPConfigureNak {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPConfigureReject {
     options: Vec<LCPOption>,
 }
@@ -397,7 +407,7 @@ impl LCPConfigureReject {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPTerminateRequest {
     data: Vec<u8>,
 }
@@ -412,7 +422,7 @@ impl LCPTerminateRequest {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPTerminateAck {
     data: Vec<u8>,
 }
@@ -427,7 +437,7 @@ impl LCPTerminateAck {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPCodeReject {
     pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
@@ -442,7 +452,7 @@ impl LCPCodeReject {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPProtocolReject {
     protocol: u16,
     pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
@@ -458,7 +468,7 @@ impl LCPProtocolReject {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPEchoRequest {
     magic: u32,
     data: Vec<u8>,
@@ -474,7 +484,7 @@ impl LCPEchoRequest {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPEchoReply {
     magic: u32,
     data: Vec<u8>,
@@ -490,7 +500,7 @@ impl LCPEchoReply {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPDiscardRequest {
     magic: u32,
     data: Vec<u8>,
