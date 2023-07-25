@@ -346,6 +346,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_terminate_request(identifier: u8, data: Vec<u8>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::TerminateRequest(LCPTerminateRequest { data }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
