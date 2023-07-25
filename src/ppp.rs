@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, LCPFullPkt, Result, Serialize};
+use crate::{Deserialize, Error, LCPFullPkt, PAPFullPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -206,6 +206,7 @@ impl From<QualityProtocol> for QualityProtocolInfo {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPPkt {
     Lcp(LCPFullPkt),
+    Pap(PAPFullPkt),
 }
 
 impl Default for PPPPkt {
@@ -218,6 +219,7 @@ impl Serialize for PPPPkt {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::Lcp(payload) => payload.serialize(w),
+            Self::Pap(payload) => payload.serialize(w),
         }
     }
 }
@@ -226,12 +228,14 @@ impl PPPPkt {
     fn discriminant(&self) -> u16 {
         match self {
             Self::Lcp(_) => LCP,
+            Self::Pap(_) => PAP,
         }
     }
 
     fn len(&self) -> u16 {
         match self {
             Self::Lcp(payload) => payload.len(),
+            Self::Pap(payload) => payload.len(),
         }
     }
 
@@ -246,6 +250,12 @@ impl PPPPkt {
 
                 tmp.deserialize(r)?;
                 *self = Self::Lcp(tmp);
+            }
+            PAP => {
+                let mut tmp = PAPFullPkt::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::Pap(tmp);
             }
             _ => return Err(Error::InvalidPPPProtocol(*discriminant)),
         }
@@ -264,6 +274,12 @@ impl PPPFullPkt {
     pub fn new_lcp(lcp: LCPFullPkt) -> Self {
         Self {
             payload: PPPPkt::Lcp(lcp),
+        }
+    }
+
+    pub fn new_pap(pap: PAPFullPkt) -> Self {
+        Self {
+            payload: PPPPkt::Pap(pap),
         }
     }
 

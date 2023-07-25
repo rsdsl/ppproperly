@@ -113,6 +113,34 @@ pub struct PAPFullPkt {
 }
 
 impl PAPFullPkt {
+    pub fn new_authenticate_request(identifier: u8, peer_id: String, passwd: String) -> Self {
+        Self {
+            identifier,
+            payload: PAPPkt::AuthenticateRequest(PAPAuthenticateRequest {
+                peer_id: PAPString(peer_id),
+                passwd: PAPString(passwd),
+            }),
+        }
+    }
+
+    pub fn new_authenticate_ack(identifier: u8, msg: String) -> Self {
+        Self {
+            identifier,
+            payload: PAPPkt::AuthenticateAck(PAPAuthenticateAck {
+                msg: PAPString(msg),
+            }),
+        }
+    }
+
+    pub fn new_authenticate_nak(identifier: u8, msg: String) -> Self {
+        Self {
+            identifier,
+            payload: PAPPkt::AuthenticateNak(PAPAuthenticateNak {
+                msg: PAPString(msg),
+            }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
