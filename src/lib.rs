@@ -1044,7 +1044,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_pap(PAPPkt::new_authenticate_request(
+            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_request(
                 0x41,
                 PAPString("foo".into()),
                 PAPString("bar".into()),
