@@ -429,7 +429,7 @@ impl LCPTerminateAck {
 
 #[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LCPCodeReject {
-    pkt: Vec<u8>, // Vec makes truncating easier without overwriting (de)ser impls.
+    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
 impl LCPCodeReject {
@@ -439,5 +439,21 @@ impl LCPCodeReject {
 
     pub fn is_empty(&self) -> bool {
         self.pkt.is_empty()
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPProtocolReject {
+    protocol: u16,
+    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
+}
+
+impl LCPProtocolReject {
+    pub fn len(&self) -> u16 {
+        2 + self.pkt.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 2
     }
 }
