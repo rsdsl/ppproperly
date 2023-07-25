@@ -35,6 +35,9 @@ pub enum Error {
     #[error("invalid quality protocol: {0}")]
     InvalidQualityProtocol(u16),
 
+    #[error("invalid PAP code: {0}")]
+    InvalidPAPCode(u8),
+
     #[error("invalid CHAP algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 

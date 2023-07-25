@@ -1,6 +1,6 @@
 use crate::{AuthProtocolInfo, Deserialize, Error, QualityProtocolInfo, Result, Serialize};
 
-use std::io::{Read, Take, Write};
+use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
@@ -71,32 +71,32 @@ impl LCPOptionPayload {
 
     fn deserialize_with_discriminant<R: Read>(
         &mut self,
-        mut r: Take<&mut R>,
+        r: &mut R,
         discriminant: &u8,
     ) -> Result<()> {
         match *discriminant {
             OPT_MRU => {
                 let mut tmp = u16::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::MRU(tmp);
             }
             OPT_AUTHENTICATION_PROTOCOL => {
                 let mut tmp = AuthProtocolInfo::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::AuthenticationProtocol(tmp);
             }
             OPT_QUALITY_PROTOCOL => {
                 let mut tmp = QualityProtocolInfo::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::QualityProtocol(tmp);
             }
             OPT_MAGIC_NUMBER => {
                 let mut tmp = u32::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::MagicNumber(tmp);
             }
             OPT_PROTOCOL_FIELD_COMPRESSION => {
@@ -232,74 +232,74 @@ impl LCPPkt {
 
     fn deserialize_with_discriminant<R: Read>(
         &mut self,
-        mut r: Take<&mut R>,
+        r: &mut R,
         discriminant: &u8,
     ) -> Result<()> {
         match *discriminant {
             LCP_CONFIGURE_REQUEST => {
                 let mut tmp = LCPConfigureRequest::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::ConfigureRequest(tmp);
             }
             LCP_CONFIGURE_ACK => {
                 let mut tmp = LCPConfigureAck::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::ConfigureAck(tmp);
             }
             LCP_CONFIGURE_NAK => {
                 let mut tmp = LCPConfigureNak::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::ConfigureNak(tmp);
             }
             LCP_CONFIGURE_REJECT => {
                 let mut tmp = LCPConfigureReject::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::ConfigureReject(tmp);
             }
             LCP_TERMINATE_REQUEST => {
                 let mut tmp = LCPTerminateRequest::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::TerminateRequest(tmp);
             }
             LCP_TERMINATE_ACK => {
                 let mut tmp = LCPTerminateAck::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::TerminateAck(tmp);
             }
             LCP_CODE_REJECT => {
                 let mut tmp = LCPCodeReject::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::CodeReject(tmp);
             }
             LCP_PROTOCOL_REJECT => {
                 let mut tmp = LCPProtocolReject::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::ProtocolReject(tmp);
             }
             LCP_ECHO_REQUEST => {
                 let mut tmp = LCPEchoRequest::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::EchoRequest(tmp);
             }
             LCP_ECHO_REPLY => {
                 let mut tmp = LCPEchoReply::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::EchoReply(tmp);
             }
             LCP_DISCARD_REQUEST => {
                 let mut tmp = LCPDiscardRequest::default();
 
-                tmp.deserialize(&mut r)?;
+                tmp.deserialize(r)?;
                 *self = Self::DiscardRequest(tmp);
             }
             _ => return Err(Error::InvalidLCPCode(*discriminant)),

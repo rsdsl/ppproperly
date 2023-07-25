@@ -7,6 +7,9 @@ pub use error::*;
 pub mod lcp;
 pub use lcp::*;
 
+pub mod pap;
+pub use pap::*;
+
 pub mod ppp;
 pub use ppp::*;
 
