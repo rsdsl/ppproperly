@@ -1143,4 +1143,30 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_pap_authenticate_nak() -> Result<()> {
+        let authenticate_nak = PPPoEFullPkt::new_ppp(
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            1,
+            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(
+                0x41,
+                PAPString("no".into()),
+            )),
+        );
+
+        let mut buf = Vec::new();
+        authenticate_nak.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+                0x11, 0x00, 0x00, 0x01, 0x00, 0x09, 0xc0, 0x23, 0x03, 0x41, 0x00, 0x07, 0x02, 0x6e,
+                0x6f
+            ]
+        );
+        Ok(())
+    }
 }
