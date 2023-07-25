@@ -404,7 +404,7 @@ pub struct LCPTerminateRequest {
 
 impl LCPTerminateRequest {
     pub fn len(&self) -> u16 {
-        self.data.len()
+        u16::try_from(self.data.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -419,7 +419,7 @@ pub struct LCPTerminateAck {
 
 impl LCPTerminateAck {
     pub fn len(&self) -> u16 {
-        self.data.len()
+        u16::try_from(self.data.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -434,7 +434,7 @@ pub struct LCPCodeReject {
 
 impl LCPCodeReject {
     pub fn len(&self) -> u16 {
-        self.pkt.len()
+        u16::try_from(self.pkt.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -450,7 +450,7 @@ pub struct LCPProtocolReject {
 
 impl LCPProtocolReject {
     pub fn len(&self) -> u16 {
-        2 + self.pkt.len()
+        2 + u16::try_from(self.pkt.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -466,7 +466,7 @@ pub struct LCPEchoRequest {
 
 impl LCPEchoRequest {
     pub fn len(&self) -> u16 {
-        4 + self.data.len()
+        4 + u16::try_from(self.data.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -482,7 +482,7 @@ pub struct LCPEchoReply {
 
 impl LCPEchoReply {
     pub fn len(&self) -> u16 {
-        4 + self.data.len()
+        4 + u16::try_from(self.data.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -498,7 +498,7 @@ pub struct LCPDiscardRequest {
 
 impl LCPDiscardRequest {
     pub fn len(&self) -> u16 {
-        4 + self.data.len()
+        4 + u16::try_from(self.data.len()).unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
