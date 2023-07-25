@@ -360,6 +360,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_code_reject(identifier: u8, pkt: Vec<u8>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::CodeReject(LCPCodeReject { pkt }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
