@@ -367,6 +367,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_protocol_reject(identifier: u8, protocol: u16, pkt: Vec<u8>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::ProtocolReject(LCPProtocolReject { protocol, pkt }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
