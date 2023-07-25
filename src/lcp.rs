@@ -381,6 +381,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_echo_reply(identifier: u8, magic: u32, data: Vec<u8>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::EchoReply(LCPEchoReply { magic, data }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
