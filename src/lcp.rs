@@ -353,6 +353,13 @@ impl LCPFullPkt {
         }
     }
 
+    pub fn new_terminate_ack(identifier: u8, data: Vec<u8>) -> Self {
+        Self {
+            identifier,
+            payload: LCPPkt::TerminateAck(LCPTerminateAck { data }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.payload.len()
     }
