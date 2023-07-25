@@ -6,7 +6,7 @@ use bitfield::bitfield;
 
 bitfield! {
     /// Version and type of a PPPoE header combined in a single octet.
-    #[derive(PartialEq, Eq)]
+    #[derive(Clone, Eq, PartialEq)]
     pub struct VerType(u8);
     impl Debug;
 

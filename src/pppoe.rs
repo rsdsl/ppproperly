@@ -151,7 +151,7 @@ impl Deserialize for PPPoECode {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEHeader {
     pub dst_mac: MACAddr,
     pub src_mac: MACAddr,
@@ -375,7 +375,7 @@ impl Deserialize for Vec<PPPoETag> {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPoEPkt {
     Ppp(PPPFullPkt),
     Padi(PPPoEPADI),
@@ -476,7 +476,7 @@ impl PPPoEPkt {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEFullPkt {
     dst_mac: MACAddr,
     src_mac: MACAddr,
@@ -566,7 +566,7 @@ impl PPPoEFullPkt {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADI {
     pub tags: Vec<PPPoETag>,
 }
@@ -585,7 +585,7 @@ impl PPPoEPADI {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADO {
     pub tags: Vec<PPPoETag>,
 }
@@ -604,7 +604,7 @@ impl PPPoEPADO {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADR {
     pub tags: Vec<PPPoETag>,
 }
@@ -623,7 +623,7 @@ impl PPPoEPADR {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADS {
     pub tags: Vec<PPPoETag>,
 }
@@ -642,7 +642,7 @@ impl PPPoEPADS {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PPPoEPADT {
     pub tags: Vec<PPPoETag>,
 }
