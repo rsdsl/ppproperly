@@ -411,3 +411,18 @@ impl LCPTerminateRequest {
         self.data.is_empty()
     }
 }
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LCPTerminateAck {
+    data: Vec<u8>,
+}
+
+impl LCPTerminateAck {
+    pub fn len(&self) -> u16 {
+        self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+}
