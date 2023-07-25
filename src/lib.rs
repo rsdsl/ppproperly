@@ -1117,4 +1117,30 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_deserialize_pap_authenticate_ack() -> Result<()> {
+        let mut authenticate_ack = PPPoEFullPkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
+            0x11, 0x00, 0x00, 0x01, 0x00, 0x09, 0xc0, 0x23, 0x02, 0x41, 0x00, 0x07, 0x02, 0x6f,
+            0x6b,
+        ];
+        authenticate_ack.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            authenticate_ack,
+            PPPoEFullPkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                1,
+                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(
+                    0x41,
+                    PAPString("ok".into())
+                ))
+            )
+        );
+        Ok(())
+    }
 }
