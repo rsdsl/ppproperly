@@ -108,28 +108,6 @@ mod tests {
     }
 
     #[test]
-    fn test_serialize_str() -> Result<()> {
-        let s = "Hello, World!";
-
-        let mut buf = Vec::new();
-        s.serialize(&mut buf)?;
-
-        assert_eq!(&buf, "\x0dHello, World!".as_bytes());
-        Ok(())
-    }
-
-    #[test]
-    fn test_deserialize_string() -> Result<()> {
-        let mut s = String::new();
-
-        let mut buf = "\x0dHello, World!?".as_bytes();
-        s.deserialize(&mut buf)?;
-
-        assert_eq!(s, String::from("Hello, World!"));
-        Ok(())
-    }
-
-    #[test]
     fn test_serialize_pppoe_tags() -> Result<()> {
         let tags: Vec<PppoeTag> = vec![
             PppoeVal::HostUniq(vec![13, 37]).into(),

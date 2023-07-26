@@ -34,10 +34,7 @@ impl Deserialize for Vec<u8> {
 
 impl Deserialize for String {
     fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
-        let mut n = 0u8;
-        n.deserialize(r)?;
-
-        r.take(n.into()).read_to_string(self)?;
+        r.read_to_string(self)?;
         Ok(())
     }
 }

@@ -1,4 +1,4 @@
-use std::{io, num, string};
+use std::{convert, io, num, string};
 
 use thiserror::Error;
 
@@ -37,6 +37,8 @@ pub enum Error {
     FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]
     Io(#[from] io::Error),
+    #[error("convert infallible: {0}")]
+    ConvertInfallible(#[from] convert::Infallible),
     #[error("integer type conversion: {0}")]
     TryFromInt(#[from] num::TryFromIntError),
 }

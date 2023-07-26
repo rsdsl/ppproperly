@@ -28,17 +28,8 @@ impl Serialize for [u8] {
     }
 }
 
-impl Serialize for &str {
-    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        u8::try_from(self.len())?.serialize(w)?;
-        self.as_bytes().serialize(w)?;
-
-        Ok(())
-    }
-}
-
 impl Serialize for String {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        self.as_str().serialize(w)
+        self.as_bytes().serialize(w)
     }
 }
