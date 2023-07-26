@@ -1375,4 +1375,108 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_serialize_ipcp_configure_nak() -> Result<()> {
+        let configure_nak = PppoePkt::new_ppp(
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            1,
+            PppPkt::new_ipcp(IpcpPkt::new_configure_nak(
+                0x41,
+                vec![IpcpOpt::IpAddr(Ipv4Addr::new(198, 51, 100, 1).into()).into()],
+            )),
+        );
+
+        let mut buf = Vec::new();
+        configure_nak.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
+                0x11, 0x00, 0x00, 0x01, 0x00, 0x0c, 0x80, 0x21, 0x03, 0x41, 0x00, 0x0a, 0x03, 0x06,
+                0xc6, 0x33, 0x64, 0x01
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_deserialize_ipcp_configure_nak() -> Result<()> {
+        let mut configure_nak = PppoePkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
+            0x11, 0x00, 0x00, 0x01, 0x00, 0x0c, 0x80, 0x21, 0x03, 0x41, 0x00, 0x0a, 0x03, 0x06,
+            0xc6, 0x33, 0x64, 0x01,
+        ];
+        configure_nak.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            configure_nak,
+            PppoePkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                1,
+                PppPkt::new_ipcp(IpcpPkt::new_configure_nak(
+                    0x41,
+                    vec![IpcpOpt::IpAddr(Ipv4Addr::new(198, 51, 100, 1).into()).into()]
+                ))
+            )
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_serialize_ipcp_configure_reject() -> Result<()> {
+        let configure_reject = PppoePkt::new_ppp(
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+            [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+            1,
+            PppPkt::new_ipcp(IpcpPkt::new_configure_reject(
+                0x41,
+                vec![IpcpOpt::IpAddr(Ipv4Addr::new(198, 51, 100, 1).into()).into()],
+            )),
+        );
+
+        let mut buf = Vec::new();
+        configure_reject.serialize(&mut buf)?;
+
+        assert_eq!(
+            &buf,
+            &[
+                0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
+                0x11, 0x00, 0x00, 0x01, 0x00, 0x0c, 0x80, 0x21, 0x04, 0x41, 0x00, 0x0a, 0x03, 0x06,
+                0xc6, 0x33, 0x64, 0x01
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_deserialize_ipcp_configure_reject() -> Result<()> {
+        let mut configure_reject = PppoePkt::default();
+
+        let buf = [
+            0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
+            0x11, 0x00, 0x00, 0x01, 0x00, 0x0c, 0x80, 0x21, 0x04, 0x41, 0x00, 0x0a, 0x03, 0x06,
+            0xc6, 0x33, 0x64, 0x01,
+        ];
+        configure_reject.deserialize(&mut buf.as_ref())?;
+
+        assert_eq!(
+            configure_reject,
+            PppoePkt::new_ppp(
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
+                [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
+                1,
+                PppPkt::new_ipcp(IpcpPkt::new_configure_reject(
+                    0x41,
+                    vec![IpcpOpt::IpAddr(Ipv4Addr::new(198, 51, 100, 1).into()).into()]
+                ))
+            )
+        );
+        Ok(())
+    }
 }
