@@ -10,20 +10,20 @@ const CHAP_SUCCESS: u8 = 3;
 const CHAP_FAILURE: u8 = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum CHAPPkt {
-    Challenge(CHAPChallenge),
-    Response(CHAPResponse),
-    Success(CHAPSuccess),
-    Failure(CHAPFailure),
+pub enum ChapData {
+    Challenge(ChapChallenge),
+    Response(ChapResponse),
+    Success(ChapSuccess),
+    Failure(ChapFailure),
 }
 
-impl Default for CHAPPkt {
+impl Default for ChapData {
     fn default() -> Self {
-        Self::Challenge(CHAPChallenge::default())
+        Self::Challenge(ChapChallenge::default())
     }
 }
 
-impl Serialize for CHAPPkt {
+impl Serialize for ChapData {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::Challenge(payload) => payload.serialize(w),
@@ -34,7 +34,7 @@ impl Serialize for CHAPPkt {
     }
 }
 
-impl CHAPPkt {
+impl ChapData {
     fn discriminant(&self) -> u8 {
         match self {
             Self::Challenge(_) => CHAP_CHALLENGE,
@@ -60,30 +60,30 @@ impl CHAPPkt {
     ) -> Result<()> {
         match *discriminant {
             CHAP_CHALLENGE => {
-                let mut tmp = CHAPChallenge::default();
+                let mut tmp = ChapChallenge::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Challenge(tmp);
             }
             CHAP_RESPONSE => {
-                let mut tmp = CHAPResponse::default();
+                let mut tmp = ChapResponse::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Response(tmp);
             }
             CHAP_SUCCESS => {
-                let mut tmp = CHAPSuccess::default();
+                let mut tmp = ChapSuccess::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Success(tmp);
             }
             CHAP_FAILURE => {
-                let mut tmp = CHAPFailure::default();
+                let mut tmp = ChapFailure::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Failure(tmp);
             }
-            _ => return Err(Error::InvalidCHAPCode(*discriminant)),
+            _ => return Err(Error::InvalidChapCode(*discriminant)),
         }
 
         Ok(())
@@ -91,16 +91,16 @@ impl CHAPPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CHAPFullPkt {
-    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
+pub struct ChapPkt {
+    #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
     identifier: u8,
-    #[ppproperly(len_for(field = "payload", offset = 4, data_type = "u16"))]
-    payload: CHAPPkt,
+    #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
+    data: ChapData,
 }
 
-impl CHAPFullPkt {
+impl ChapPkt {
     pub fn len(&self) -> u16 {
-        4 + self.payload.len()
+        4 + self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -109,13 +109,13 @@ impl CHAPFullPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CHAPChallenge {
+pub struct ChapChallenge {
     #[ppproperly(len_for(field = "value", offset = 0, data_type = "u8"))]
     value: Vec<u8>,
     name: String,
 }
 
-impl CHAPChallenge {
+impl ChapChallenge {
     pub fn len(&self) -> u16 {
         (1 + self.value.len() + self.name.len()).try_into().unwrap()
     }
@@ -126,13 +126,13 @@ impl CHAPChallenge {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CHAPResponse {
+pub struct ChapResponse {
     #[ppproperly(len_for(field = "value", offset = 0, data_type = "u8"))]
     value: Vec<u8>,
     name: String,
 }
 
-impl CHAPResponse {
+impl ChapResponse {
     pub fn len(&self) -> u16 {
         (1 + self.value.len() + self.name.len()).try_into().unwrap()
     }
@@ -143,11 +143,11 @@ impl CHAPResponse {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CHAPSuccess {
+pub struct ChapSuccess {
     message: String,
 }
 
-impl CHAPSuccess {
+impl ChapSuccess {
     pub fn len(&self) -> u16 {
         self.message.len().try_into().unwrap()
     }
@@ -158,11 +158,11 @@ impl CHAPSuccess {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CHAPFailure {
+pub struct ChapFailure {
     message: String,
 }
 
-impl CHAPFailure {
+impl ChapFailure {
     pub fn len(&self) -> u16 {
         self.message.len().try_into().unwrap()
     }
