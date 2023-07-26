@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, LcpPkt, PapPkt, Result, Serialize};
+use crate::{ChapPkt, Deserialize, Error, LcpPkt, PapPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -207,6 +207,7 @@ impl From<QualityProto> for QualityProtocol {
 pub enum PppData {
     Lcp(LcpPkt),
     Pap(PapPkt),
+    Chap(ChapPkt),
 }
 
 impl Default for PppData {
@@ -220,6 +221,7 @@ impl Serialize for PppData {
         match self {
             Self::Lcp(payload) => payload.serialize(w),
             Self::Pap(payload) => payload.serialize(w),
+            Self::Chap(payload) => payload.serialize(w),
         }
     }
 }
@@ -229,6 +231,7 @@ impl PppData {
         match self {
             Self::Lcp(_) => LCP,
             Self::Pap(_) => PAP,
+            Self::Chap(_) => CHAP,
         }
     }
 
@@ -236,6 +239,7 @@ impl PppData {
         match self {
             Self::Lcp(payload) => payload.len(),
             Self::Pap(payload) => payload.len(),
+            Self::Chap(payload) => payload.len(),
         }
     }
 
@@ -256,6 +260,12 @@ impl PppData {
 
                 tmp.deserialize(r)?;
                 *self = Self::Pap(tmp);
+            }
+            CHAP => {
+                let mut tmp = ChapPkt::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::Chap(tmp);
             }
             _ => return Err(Error::InvalidPppProtocol(*discriminant)),
         }
@@ -280,6 +290,12 @@ impl PppPkt {
     pub fn new_pap(pap: PapPkt) -> Self {
         Self {
             data: PppData::Pap(pap),
+        }
+    }
+
+    pub fn new_chap(chap: ChapPkt) -> Self {
+        Self {
+            data: PppData::Chap(chap),
         }
     }
 

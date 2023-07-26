@@ -99,6 +99,34 @@ pub struct ChapPkt {
 }
 
 impl ChapPkt {
+    pub fn new_challenge(identifier: u8, value: Vec<u8>, name: String) -> Self {
+        Self {
+            identifier,
+            data: ChapData::Challenge(ChapChallenge { value, name }),
+        }
+    }
+
+    pub fn new_response(identifier: u8, value: Vec<u8>, name: String) -> Self {
+        Self {
+            identifier,
+            data: ChapData::Response(ChapResponse { value, name }),
+        }
+    }
+
+    pub fn new_success(identifier: u8, message: String) -> Self {
+        Self {
+            identifier,
+            data: ChapData::Success(ChapSuccess { message }),
+        }
+    }
+
+    pub fn new_failure(identifier: u8, message: String) -> Self {
+        Self {
+            identifier,
+            data: ChapData::Failure(ChapFailure { message }),
+        }
+    }
+
     pub fn len(&self) -> u16 {
         4 + self.data.len()
     }
