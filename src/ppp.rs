@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, LcpPkt, PAPFullPkt, Result, Serialize};
+use crate::{Deserialize, Error, LcpPkt, PapPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -51,18 +51,18 @@ impl Deserialize for ChapAlgorithm {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum AuthProtocol {
+pub enum AuthProto {
     Pap,
     Chap(ChapAlgorithm),
 }
 
-impl Default for AuthProtocol {
+impl Default for AuthProto {
     fn default() -> Self {
         Self::Pap
     }
 }
 
-impl Serialize for AuthProtocol {
+impl Serialize for AuthProto {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::Pap => Ok(()),
@@ -71,7 +71,7 @@ impl Serialize for AuthProtocol {
     }
 }
 
-impl AuthProtocol {
+impl AuthProto {
     fn discriminant(&self) -> u16 {
         match self {
             Self::Pap => PAP,
@@ -109,12 +109,12 @@ impl AuthProtocol {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct AuthProtocolInfo {
+pub struct AuthProtocol {
     #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
-    protocol: AuthProtocol,
+    protocol: AuthProto,
 }
 
-impl AuthProtocolInfo {
+impl AuthProtocol {
     pub fn len(&self) -> u8 {
         2 + self.protocol.len()
     }
@@ -124,24 +124,24 @@ impl AuthProtocolInfo {
     }
 }
 
-impl From<AuthProtocol> for AuthProtocolInfo {
-    fn from(protocol: AuthProtocol) -> Self {
+impl From<AuthProto> for AuthProtocol {
+    fn from(protocol: AuthProto) -> Self {
         Self { protocol }
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum QualityProtocol {
+pub enum QualityProto {
     LinkQualityReport(u32),
 }
 
-impl Default for QualityProtocol {
+impl Default for QualityProto {
     fn default() -> Self {
         Self::LinkQualityReport(0)
     }
 }
 
-impl Serialize for QualityProtocol {
+impl Serialize for QualityProto {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::LinkQualityReport(payload) => payload.serialize(w),
@@ -149,7 +149,7 @@ impl Serialize for QualityProtocol {
     }
 }
 
-impl QualityProtocol {
+impl QualityProto {
     fn discriminant(&self) -> u16 {
         match self {
             Self::LinkQualityReport(_) => LQR,
@@ -182,12 +182,12 @@ impl QualityProtocol {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct QualityProtocolInfo {
+pub struct QualityProtocol {
     #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
-    protocol: QualityProtocol,
+    protocol: QualityProto,
 }
 
-impl QualityProtocolInfo {
+impl QualityProtocol {
     pub fn len(&self) -> u8 {
         2 + self.protocol.len()
     }
@@ -197,25 +197,25 @@ impl QualityProtocolInfo {
     }
 }
 
-impl From<QualityProtocol> for QualityProtocolInfo {
-    fn from(protocol: QualityProtocol) -> Self {
+impl From<QualityProto> for QualityProtocol {
+    fn from(protocol: QualityProto) -> Self {
         Self { protocol }
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum PPPPkt {
+pub enum PppData {
     Lcp(LcpPkt),
-    Pap(PAPFullPkt),
+    Pap(PapPkt),
 }
 
-impl Default for PPPPkt {
+impl Default for PppData {
     fn default() -> Self {
         Self::Lcp(LcpPkt::default())
     }
 }
 
-impl Serialize for PPPPkt {
+impl Serialize for PppData {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::Lcp(payload) => payload.serialize(w),
@@ -224,7 +224,7 @@ impl Serialize for PPPPkt {
     }
 }
 
-impl PPPPkt {
+impl PppData {
     fn discriminant(&self) -> u16 {
         match self {
             Self::Lcp(_) => LCP,
@@ -252,7 +252,7 @@ impl PPPPkt {
                 *self = Self::Lcp(tmp);
             }
             PAP => {
-                let mut tmp = PAPFullPkt::default();
+                let mut tmp = PapPkt::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Pap(tmp);
@@ -265,26 +265,26 @@ impl PPPPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PPPFullPkt {
-    #[ppproperly(discriminant_for(field = "payload", data_type = "u16"))]
-    payload: PPPPkt,
+pub struct PppPkt {
+    #[ppproperly(discriminant_for(field = "data", data_type = "u16"))]
+    data: PppData,
 }
 
-impl PPPFullPkt {
+impl PppPkt {
     pub fn new_lcp(lcp: LcpPkt) -> Self {
         Self {
-            payload: PPPPkt::Lcp(lcp),
+            data: PppData::Lcp(lcp),
         }
     }
 
-    pub fn new_pap(pap: PAPFullPkt) -> Self {
+    pub fn new_pap(pap: PapPkt) -> Self {
         Self {
-            payload: PPPPkt::Pap(pap),
+            data: PppData::Pap(pap),
         }
     }
 
     pub fn len(&self) -> u16 {
-        2 + self.payload.len()
+        2 + self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {

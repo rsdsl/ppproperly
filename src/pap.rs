@@ -9,19 +9,19 @@ const PAP_AUTH_ACK: u8 = 2;
 const PAP_AUTH_NAK: u8 = 3;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum PAPPkt {
-    AuthenticateRequest(PAPAuthenticateRequest),
-    AuthenticateAck(PAPAuthenticateAck),
-    AuthenticateNak(PAPAuthenticateNak),
+pub enum PapData {
+    AuthenticateRequest(PapAuthenticateRequest),
+    AuthenticateAck(PapAuthenticateAck),
+    AuthenticateNak(PapAuthenticateNak),
 }
 
-impl Default for PAPPkt {
+impl Default for PapData {
     fn default() -> Self {
-        Self::AuthenticateRequest(PAPAuthenticateRequest::default())
+        Self::AuthenticateRequest(PapAuthenticateRequest::default())
     }
 }
 
-impl Serialize for PAPPkt {
+impl Serialize for PapData {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::AuthenticateRequest(payload) => payload.serialize(w),
@@ -31,7 +31,7 @@ impl Serialize for PAPPkt {
     }
 }
 
-impl PAPPkt {
+impl PapData {
     fn discriminant(&self) -> u8 {
         match self {
             Self::AuthenticateRequest(_) => PAP_AUTH_REQUEST,
@@ -55,19 +55,19 @@ impl PAPPkt {
     ) -> Result<()> {
         match *discriminant {
             PAP_AUTH_REQUEST => {
-                let mut tmp = PAPAuthenticateRequest::default();
+                let mut tmp = PapAuthenticateRequest::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticateRequest(tmp);
             }
             PAP_AUTH_ACK => {
-                let mut tmp = PAPAuthenticateAck::default();
+                let mut tmp = PapAuthenticateAck::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticateAck(tmp);
             }
             PAP_AUTH_NAK => {
-                let mut tmp = PAPAuthenticateNak::default();
+                let mut tmp = PapAuthenticateNak::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticateNak(tmp);
@@ -80,37 +80,37 @@ impl PAPPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PAPFullPkt {
-    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
+pub struct PapPkt {
+    #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
     identifier: u8,
-    #[ppproperly(len_for(field = "payload", offset = 4, data_type = "u16"))]
-    payload: PAPPkt,
+    #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
+    data: PapData,
 }
 
-impl PAPFullPkt {
+impl PapPkt {
     pub fn new_authenticate_request(identifier: u8, peer_id: String, passwd: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateRequest(PAPAuthenticateRequest { peer_id, passwd }),
+            data: PapData::AuthenticateRequest(PapAuthenticateRequest { peer_id, passwd }),
         }
     }
 
     pub fn new_authenticate_ack(identifier: u8, msg: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateAck(PAPAuthenticateAck { msg }),
+            data: PapData::AuthenticateAck(PapAuthenticateAck { msg }),
         }
     }
 
     pub fn new_authenticate_nak(identifier: u8, msg: String) -> Self {
         Self {
             identifier,
-            payload: PAPPkt::AuthenticateNak(PAPAuthenticateNak { msg }),
+            data: PapData::AuthenticateNak(PapAuthenticateNak { msg }),
         }
     }
 
     pub fn len(&self) -> u16 {
-        4 + self.payload.len()
+        4 + self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -119,12 +119,12 @@ impl PAPFullPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PAPAuthenticateRequest {
+pub struct PapAuthenticateRequest {
     peer_id: String,
     passwd: String,
 }
 
-impl PAPAuthenticateRequest {
+impl PapAuthenticateRequest {
     pub fn len(&self) -> u16 {
         (2 + self.peer_id.len() + self.passwd.len())
             .try_into()
@@ -137,11 +137,11 @@ impl PAPAuthenticateRequest {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PAPAuthenticateAck {
+pub struct PapAuthenticateAck {
     msg: String,
 }
 
-impl PAPAuthenticateAck {
+impl PapAuthenticateAck {
     pub fn len(&self) -> u16 {
         (1 + self.msg.len()).try_into().unwrap()
     }
@@ -152,11 +152,11 @@ impl PAPAuthenticateAck {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct PAPAuthenticateNak {
+pub struct PapAuthenticateNak {
     msg: String,
 }
 
-impl PAPAuthenticateNak {
+impl PapAuthenticateNak {
     pub fn len(&self) -> u16 {
         (1 + self.msg.len()).try_into().unwrap()
     }

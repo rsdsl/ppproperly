@@ -130,61 +130,11 @@ mod tests {
     }
 
     #[test]
-    fn test_serialize_pppoe_header() -> Result<()> {
-        let header = PPPoEHeader {
-            dst_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
-            src_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
-            ether_type: EtherType::PPPoED,
-            ver_type: VerType::default(),
-            code: PPPoECode::Padt,
-            session_id: 1337,
-            len: 0,
-        };
-
-        let mut buf = Vec::new();
-        header.serialize(&mut buf)?;
-
-        assert_eq!(
-            &buf,
-            &[
-                0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
-                0x11, 0xa7, 0x05, 0x39, 0x00, 0x00
-            ]
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn test_deserialize_pppoe_header() -> Result<()> {
-        let mut header = PPPoEHeader::default();
-
-        let buf = [
-            0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
-            0x11, 0xa7, 0x05, 0x39, 0x00, 0x00,
-        ];
-        header.deserialize(&mut buf.as_ref())?;
-
-        assert_eq!(
-            header,
-            PPPoEHeader {
-                dst_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
-                src_mac: [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
-                ether_type: EtherType::PPPoED,
-                ver_type: VerType::default(),
-                code: PPPoECode::Padt,
-                session_id: 1337,
-                len: 0,
-            }
-        );
-        Ok(())
-    }
-
-    #[test]
     fn test_serialize_pppoe_tags() -> Result<()> {
-        let tags: Vec<PPPoETag> = vec![
-            PPPoETagPayload::HostUniq(vec![13, 37]).into(),
-            PPPoETagPayload::GenericError(String::from("err")).into(),
-            PPPoETagPayload::Metrics.into(),
+        let tags: Vec<PppoeTag> = vec![
+            PppoeVal::HostUniq(vec![13, 37]).into(),
+            PppoeVal::GenericError(String::from("err")).into(),
+            PppoeVal::Metrics.into(),
         ];
 
         let mut buf = Vec::new();
@@ -202,7 +152,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_tags() -> Result<()> {
-        let mut tags: Vec<PPPoETag> = Vec::new();
+        let mut tags: Vec<PppoeTag> = Vec::new();
 
         let buf = [
             0x01, 0x03, 0x00, 0x02, 0x0d, 0x25, 0x02, 0x03, 0x00, 0x03, 0x65, 0x72, 0x72, 0x01,
@@ -213,9 +163,9 @@ mod tests {
         assert_eq!(
             tags,
             vec![
-                PPPoETagPayload::HostUniq(vec![13, 37]).into(),
-                PPPoETagPayload::GenericError(String::from("err")).into(),
-                PPPoETagPayload::Metrics.into(),
+                PppoeVal::HostUniq(vec![13, 37]).into(),
+                PppoeVal::GenericError(String::from("err")).into(),
+                PppoeVal::Metrics.into(),
             ]
         );
         Ok(())
@@ -223,9 +173,9 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_padi() -> Result<()> {
-        let padi = PPPoEFullPkt::new_padi(
-            MACAddr::UNSPECIFIED,
-            vec![PPPoETagPayload::HostUniq(vec![13, 37]).into()],
+        let padi = PppoePkt::new_padi(
+            MacAddr::UNSPECIFIED,
+            vec![PppoeVal::HostUniq(vec![13, 37]).into()],
         );
 
         let mut buf = Vec::new();
@@ -243,7 +193,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_padi() -> Result<()> {
-        let mut padi = PPPoEFullPkt::default();
+        let mut padi = PppoePkt::default();
 
         let buf = [
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x63,
@@ -253,9 +203,9 @@ mod tests {
 
         assert_eq!(
             padi,
-            PPPoEFullPkt::new_padi(
-                MACAddr::UNSPECIFIED,
-                vec![PPPoETagPayload::HostUniq(vec![13, 37]).into()]
+            PppoePkt::new_padi(
+                MacAddr::UNSPECIFIED,
+                vec![PppoeVal::HostUniq(vec![13, 37]).into()]
             )
         );
         Ok(())
@@ -263,12 +213,12 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_pado() -> Result<()> {
-        let pado = PPPoEFullPkt::new_pado(
+        let pado = PppoePkt::new_pado(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             vec![
-                PPPoETagPayload::ACName("isp_ac".into()).into(),
-                PPPoETagPayload::ServiceName("isp_svc".into()).into(),
+                PppoeVal::AcName("isp_ac".into()).into(),
+                PppoeVal::ServiceName("isp_svc".into()).into(),
             ],
         );
 
@@ -288,7 +238,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_pado() -> Result<()> {
-        let mut pado = PPPoEFullPkt::default();
+        let mut pado = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
@@ -299,12 +249,12 @@ mod tests {
 
         assert_eq!(
             pado,
-            PPPoEFullPkt::new_pado(
+            PppoePkt::new_pado(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 vec![
-                    PPPoETagPayload::ACName("isp_ac".into()).into(),
-                    PPPoETagPayload::ServiceName("isp_svc".into()).into()
+                    PppoeVal::AcName("isp_ac".into()).into(),
+                    PppoeVal::ServiceName("isp_svc".into()).into()
                 ]
             )
         );
@@ -313,10 +263,10 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_padr() -> Result<()> {
-        let padr = PPPoEFullPkt::new_padr(
+        let padr = PppoePkt::new_padr(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
-            vec![PPPoETagPayload::ServiceName("isp_svc".into()).into()],
+            vec![PppoeVal::ServiceName("isp_svc".into()).into()],
         );
 
         let mut buf = Vec::new();
@@ -335,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_padr() -> Result<()> {
-        let mut padr = PPPoEFullPkt::default();
+        let mut padr = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x63,
@@ -346,10 +296,10 @@ mod tests {
 
         assert_eq!(
             padr,
-            PPPoEFullPkt::new_padr(
+            PppoePkt::new_padr(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
-                vec![PPPoETagPayload::ServiceName("isp_svc".into()).into()]
+                vec![PppoeVal::ServiceName("isp_svc".into()).into()]
             )
         );
         Ok(())
@@ -357,11 +307,11 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_pads() -> Result<()> {
-        let pads = PPPoEFullPkt::new_pads(
+        let pads = PppoePkt::new_pads(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            vec![PPPoETagPayload::ServiceName("isp_svc".into()).into()],
+            vec![PppoeVal::ServiceName("isp_svc".into()).into()],
         );
 
         let mut buf = Vec::new();
@@ -380,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_pads() -> Result<()> {
-        let mut pads = PPPoEFullPkt::default();
+        let mut pads = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
@@ -391,11 +341,11 @@ mod tests {
 
         assert_eq!(
             pads,
-            PPPoEFullPkt::new_pads(
+            PppoePkt::new_pads(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                vec![PPPoETagPayload::ServiceName("isp_svc".into()).into()]
+                vec![PppoeVal::ServiceName("isp_svc".into()).into()]
             )
         );
         Ok(())
@@ -403,11 +353,11 @@ mod tests {
 
     #[test]
     fn test_serialize_pppoe_padt() -> Result<()> {
-        let padt = PPPoEFullPkt::new_padt(
+        let padt = PppoePkt::new_padt(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            vec![PPPoETagPayload::GenericError("err".into()).into()],
+            vec![PppoeVal::GenericError("err".into()).into()],
         );
 
         let mut buf = Vec::new();
@@ -425,7 +375,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pppoe_padt() -> Result<()> {
-        let mut padt = PPPoEFullPkt::default();
+        let mut padt = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x63,
@@ -435,11 +385,11 @@ mod tests {
 
         assert_eq!(
             padt,
-            PPPoEFullPkt::new_padt(
+            PppoePkt::new_padt(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                vec![PPPoETagPayload::GenericError("err".into()).into()]
+                vec![PppoeVal::GenericError("err".into()).into()]
             )
         );
         Ok(())
@@ -447,15 +397,15 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_configure_request() -> Result<()> {
-        let configure_request = PPPoEFullPkt::new_ppp(
+        let configure_request = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_configure_request(
+            PppPkt::new_lcp(LcpPkt::new_configure_request(
                 0x41,
                 vec![
                     LcpOpt::Mru(1492).into(),
-                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                    LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
                         .into(),
                     LcpOpt::MagicNumber(1337).into(),
                 ],
@@ -478,7 +428,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_configure_request() -> Result<()> {
-        let mut configure_request = PPPoEFullPkt::default();
+        let mut configure_request = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -489,18 +439,16 @@ mod tests {
 
         assert_eq!(
             configure_request,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_configure_request(
+                PppPkt::new_lcp(LcpPkt::new_configure_request(
                     0x41,
                     vec![
                         LcpOpt::Mru(1492).into(),
-                        LcpOpt::AuthenticationProtocol(
-                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
-                        )
-                        .into(),
+                        LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
+                            .into(),
                         LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
@@ -511,15 +459,15 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_configure_ack() -> Result<()> {
-        let configure_ack = PPPoEFullPkt::new_ppp(
+        let configure_ack = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_configure_ack(
+            PppPkt::new_lcp(LcpPkt::new_configure_ack(
                 0x41,
                 vec![
                     LcpOpt::Mru(1492).into(),
-                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                    LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
                         .into(),
                     LcpOpt::MagicNumber(1337).into(),
                 ],
@@ -542,7 +490,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_configure_ack() -> Result<()> {
-        let mut configure_ack = PPPoEFullPkt::default();
+        let mut configure_ack = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -553,18 +501,16 @@ mod tests {
 
         assert_eq!(
             configure_ack,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_configure_ack(
+                PppPkt::new_lcp(LcpPkt::new_configure_ack(
                     0x41,
                     vec![
                         LcpOpt::Mru(1492).into(),
-                        LcpOpt::AuthenticationProtocol(
-                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
-                        )
-                        .into(),
+                        LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
+                            .into(),
                         LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
@@ -575,15 +521,15 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_configure_nak() -> Result<()> {
-        let configure_nak = PPPoEFullPkt::new_ppp(
+        let configure_nak = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_configure_nak(
+            PppPkt::new_lcp(LcpPkt::new_configure_nak(
                 0x41,
                 vec![
                     LcpOpt::Mru(1492).into(),
-                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                    LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
                         .into(),
                     LcpOpt::MagicNumber(1337).into(),
                 ],
@@ -606,7 +552,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_configure_nak() -> Result<()> {
-        let mut configure_nak = PPPoEFullPkt::default();
+        let mut configure_nak = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -617,18 +563,16 @@ mod tests {
 
         assert_eq!(
             configure_nak,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_configure_nak(
+                PppPkt::new_lcp(LcpPkt::new_configure_nak(
                     0x41,
                     vec![
                         LcpOpt::Mru(1492).into(),
-                        LcpOpt::AuthenticationProtocol(
-                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
-                        )
-                        .into(),
+                        LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
+                            .into(),
                         LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
@@ -639,15 +583,15 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_configure_reject() -> Result<()> {
-        let configure_reject = PPPoEFullPkt::new_ppp(
+        let configure_reject = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_configure_reject(
+            PppPkt::new_lcp(LcpPkt::new_configure_reject(
                 0x41,
                 vec![
                     LcpOpt::Mru(1492).into(),
-                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                    LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
                         .into(),
                     LcpOpt::MagicNumber(1337).into(),
                 ],
@@ -670,7 +614,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_configure_reject() -> Result<()> {
-        let mut configure_reject = PPPoEFullPkt::default();
+        let mut configure_reject = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -681,18 +625,16 @@ mod tests {
 
         assert_eq!(
             configure_reject,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_configure_reject(
+                PppPkt::new_lcp(LcpPkt::new_configure_reject(
                     0x41,
                     vec![
                         LcpOpt::Mru(1492).into(),
-                        LcpOpt::AuthenticationProtocol(
-                            AuthProtocol::Chap(ChapAlgorithm::Md5).into()
-                        )
-                        .into(),
+                        LcpOpt::AuthenticationProtocol(AuthProto::Chap(ChapAlgorithm::Md5).into())
+                            .into(),
                         LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
@@ -703,11 +645,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_terminate_request() -> Result<()> {
-        let terminate_request = PPPoEFullPkt::new_ppp(
+        let terminate_request = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -725,7 +667,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_terminate_request() -> Result<()> {
-        let mut terminate_request = PPPoEFullPkt::default();
+        let mut terminate_request = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -735,11 +677,11 @@ mod tests {
 
         assert_eq!(
             terminate_request,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -747,11 +689,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_terminate_ack() -> Result<()> {
-        let terminate_ack = PPPoEFullPkt::new_ppp(
+        let terminate_ack = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -769,7 +711,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_terminate_ack() -> Result<()> {
-        let mut terminate_ack = PPPoEFullPkt::default();
+        let mut terminate_ack = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -779,11 +721,11 @@ mod tests {
 
         assert_eq!(
             terminate_ack,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -791,11 +733,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_code_reject() -> Result<()> {
-        let code_reject = PPPoEFullPkt::new_ppp(
+        let code_reject = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -813,7 +755,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_code_reject() -> Result<()> {
-        let mut code_reject = PPPoEFullPkt::default();
+        let mut code_reject = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -823,11 +765,11 @@ mod tests {
 
         assert_eq!(
             code_reject,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -835,11 +777,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_protocol_reject() -> Result<()> {
-        let protocol_reject = PPPoEFullPkt::new_ppp(
+        let protocol_reject = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -858,7 +800,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_protocol_reject() -> Result<()> {
-        let mut protocol_reject = PPPoEFullPkt::default();
+        let mut protocol_reject = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -869,11 +811,11 @@ mod tests {
 
         assert_eq!(
             protocol_reject,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -881,11 +823,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_echo_request() -> Result<()> {
-        let echo_request = PPPoEFullPkt::new_ppp(
+        let echo_request = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -904,7 +846,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_echo_request() -> Result<()> {
-        let mut echo_request = PPPoEFullPkt::default();
+        let mut echo_request = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -915,11 +857,11 @@ mod tests {
 
         assert_eq!(
             echo_request,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -927,11 +869,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_echo_reply() -> Result<()> {
-        let echo_reply = PPPoEFullPkt::new_ppp(
+        let echo_reply = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -950,7 +892,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_echo_reply() -> Result<()> {
-        let mut echo_reply = PPPoEFullPkt::default();
+        let mut echo_reply = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -961,11 +903,11 @@ mod tests {
 
         assert_eq!(
             echo_reply,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -973,11 +915,11 @@ mod tests {
 
     #[test]
     fn test_serialize_lcp_discard_request() -> Result<()> {
-        let discard_request = PPPoEFullPkt::new_ppp(
+        let discard_request = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41])),
+            PppPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -996,7 +938,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_lcp_discard_request() -> Result<()> {
-        let mut discard_request = PPPoEFullPkt::default();
+        let mut discard_request = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -1007,11 +949,11 @@ mod tests {
 
         assert_eq!(
             discard_request,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41]))
+                PppPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -1019,11 +961,11 @@ mod tests {
 
     #[test]
     fn test_serialize_pap_authenticate_request() -> Result<()> {
-        let authenticate_request = PPPoEFullPkt::new_ppp(
+        let authenticate_request = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_request(
+            PppPkt::new_pap(PapPkt::new_authenticate_request(
                 0x41,
                 "foo".into(),
                 "bar".into(),
@@ -1046,7 +988,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pap_authenticate_request() -> Result<()> {
-        let mut authenticate_request = PPPoEFullPkt::default();
+        let mut authenticate_request = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x88, 0x64,
@@ -1057,11 +999,11 @@ mod tests {
 
         assert_eq!(
             authenticate_request,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_request(
+                PppPkt::new_pap(PapPkt::new_authenticate_request(
                     0x41,
                     "foo".into(),
                     "bar".into()
@@ -1073,11 +1015,11 @@ mod tests {
 
     #[test]
     fn test_serialize_pap_authenticate_ack() -> Result<()> {
-        let authenticate_ack = PPPoEFullPkt::new_ppp(
+        let authenticate_ack = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(0x41, "ok".into())),
+            PppPkt::new_pap(PapPkt::new_authenticate_ack(0x41, "ok".into())),
         );
 
         let mut buf = Vec::new();
@@ -1096,7 +1038,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pap_authenticate_ack() -> Result<()> {
-        let mut authenticate_ack = PPPoEFullPkt::default();
+        let mut authenticate_ack = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -1107,11 +1049,11 @@ mod tests {
 
         assert_eq!(
             authenticate_ack,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_ack(0x41, "ok".into()))
+                PppPkt::new_pap(PapPkt::new_authenticate_ack(0x41, "ok".into()))
             )
         );
         Ok(())
@@ -1119,11 +1061,11 @@ mod tests {
 
     #[test]
     fn test_serialize_pap_authenticate_nak() -> Result<()> {
-        let authenticate_nak = PPPoEFullPkt::new_ppp(
+        let authenticate_nak = PppoePkt::new_ppp(
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(0x41, "no".into())),
+            PppPkt::new_pap(PapPkt::new_authenticate_nak(0x41, "no".into())),
         );
 
         let mut buf = Vec::new();
@@ -1142,7 +1084,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_pap_authenticate_nak() -> Result<()> {
-        let mut authenticate_nak = PPPoEFullPkt::default();
+        let mut authenticate_nak = PppoePkt::default();
 
         let buf = [
             0x00, 0x00, 0x5e, 0x00, 0x53, 0x02, 0x00, 0x00, 0x5e, 0x00, 0x53, 0x01, 0x88, 0x64,
@@ -1153,11 +1095,11 @@ mod tests {
 
         assert_eq!(
             authenticate_nak,
-            PPPoEFullPkt::new_ppp(
+            PppoePkt::new_ppp(
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_pap(PAPFullPkt::new_authenticate_nak(0x41, "no".into()))
+                PppPkt::new_pap(PapPkt::new_authenticate_nak(0x41, "no".into()))
             )
         );
         Ok(())

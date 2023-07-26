@@ -1,4 +1,4 @@
-use crate::{AuthProtocolInfo, Deserialize, Error, QualityProtocolInfo, Result, Serialize};
+use crate::{AuthProtocol, Deserialize, Error, QualityProtocol, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -26,8 +26,8 @@ const OPT_ADDR_CTL_FIELD_COMPRESSION: u8 = 8;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LcpOpt {
     Mru(u16),
-    AuthenticationProtocol(AuthProtocolInfo),
-    QualityProtocol(QualityProtocolInfo),
+    AuthenticationProtocol(AuthProtocol),
+    QualityProtocol(QualityProtocol),
     MagicNumber(u32),
     ProtocolFieldCompression,
     AddrCtlFieldCompression,
@@ -82,13 +82,13 @@ impl LcpOpt {
                 *self = Self::Mru(tmp);
             }
             OPT_AUTHENTICATION_PROTOCOL => {
-                let mut tmp = AuthProtocolInfo::default();
+                let mut tmp = AuthProtocol::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticationProtocol(tmp);
             }
             OPT_QUALITY_PROTOCOL => {
-                let mut tmp = QualityProtocolInfo::default();
+                let mut tmp = QualityProtocol::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::QualityProtocol(tmp);
