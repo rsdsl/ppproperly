@@ -10,6 +10,9 @@ pub use error::*;
 pub mod ipcp;
 pub use ipcp::*;
 
+pub mod ipv6cp;
+pub use ipv6cp::*;
+
 pub mod lcp;
 pub use lcp::*;
 
