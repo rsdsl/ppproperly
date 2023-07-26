@@ -43,6 +43,12 @@ impl Default for Ipv4Addr {
     }
 }
 
+impl From<std::net::Ipv4Addr> for Ipv4Addr {
+    fn from(addr: std::net::Ipv4Addr) -> Self {
+        Self(addr)
+    }
+}
+
 impl Serialize for Ipv4Addr {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         u32::from(self.0).serialize(w)
