@@ -1,4 +1,4 @@
-use crate::{ChapPkt, Deserialize, Error, IpcpPkt, LcpPkt, PapPkt, Result, Serialize};
+use crate::{ChapPkt, Deserialize, Error, IpcpPkt, Ipv6cpPkt, LcpPkt, PapPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -8,6 +8,7 @@ const LCP: u16 = 0xc021;
 const PAP: u16 = 0xc023;
 const CHAP: u16 = 0xc223;
 const IPCP: u16 = 0x8021;
+const IPV6CP: u16 = 0x8057;
 
 const LQR: u16 = 0xc025;
 const VAN_JACOBSON: u16 = 0x002d;
@@ -301,6 +302,7 @@ pub enum PppData {
     Pap(PapPkt),
     Chap(ChapPkt),
     Ipcp(IpcpPkt),
+    Ipv6cp(Ipv6cpPkt),
 }
 
 impl Default for PppData {
@@ -316,6 +318,7 @@ impl Serialize for PppData {
             Self::Pap(payload) => payload.serialize(w),
             Self::Chap(payload) => payload.serialize(w),
             Self::Ipcp(payload) => payload.serialize(w),
+            Self::Ipv6cp(payload) => payload.serialize(w),
         }
     }
 }
@@ -327,6 +330,7 @@ impl PppData {
             Self::Pap(_) => PAP,
             Self::Chap(_) => CHAP,
             Self::Ipcp(_) => IPCP,
+            Self::Ipv6cp(_) => IPV6CP,
         }
     }
 
@@ -336,6 +340,7 @@ impl PppData {
             Self::Pap(payload) => payload.len(),
             Self::Chap(payload) => payload.len(),
             Self::Ipcp(payload) => payload.len(),
+            Self::Ipv6cp(payload) => payload.len(),
         }
     }
 
@@ -368,6 +373,12 @@ impl PppData {
 
                 tmp.deserialize(r)?;
                 *self = Self::Ipcp(tmp);
+            }
+            IPV6CP => {
+                let mut tmp = Ipv6cpPkt::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::Ipv6cp(tmp);
             }
             _ => return Err(Error::InvalidPppProtocol(*discriminant)),
         }
@@ -404,6 +415,12 @@ impl PppPkt {
     pub fn new_ipcp(ipcp: IpcpPkt) -> Self {
         Self {
             data: PppData::Ipcp(ipcp),
+        }
+    }
+
+    pub fn new_ipv6cp(ipv6cp: Ipv6cpPkt) -> Self {
+        Self {
+            data: PppData::Ipv6cp(ipv6cp),
         }
     }
 
