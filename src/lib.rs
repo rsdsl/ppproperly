@@ -451,15 +451,13 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_configure_request(
+            PPPFullPkt::new_lcp(LcpPkt::new_configure_request(
                 0x41,
                 vec![
-                    LCPOptionPayload::MRU(1492).into(),
-                    LCPOptionPayload::AuthenticationProtocol(
-                        AuthProtocol::Chap(ChapAlgorithm::Md5).into(),
-                    )
-                    .into(),
-                    LCPOptionPayload::MagicNumber(1337).into(),
+                    LcpOpt::Mru(1492).into(),
+                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                        .into(),
+                    LcpOpt::MagicNumber(1337).into(),
                 ],
             )),
         );
@@ -495,15 +493,15 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_configure_request(
+                PPPFullPkt::new_lcp(LcpPkt::new_configure_request(
                     0x41,
                     vec![
-                        LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(
+                        LcpOpt::Mru(1492).into(),
+                        LcpOpt::AuthenticationProtocol(
                             AuthProtocol::Chap(ChapAlgorithm::Md5).into()
                         )
                         .into(),
-                        LCPOptionPayload::MagicNumber(1337).into()
+                        LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
             )
@@ -517,15 +515,13 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_configure_ack(
+            PPPFullPkt::new_lcp(LcpPkt::new_configure_ack(
                 0x41,
                 vec![
-                    LCPOptionPayload::MRU(1492).into(),
-                    LCPOptionPayload::AuthenticationProtocol(
-                        AuthProtocol::Chap(ChapAlgorithm::Md5).into(),
-                    )
-                    .into(),
-                    LCPOptionPayload::MagicNumber(1337).into(),
+                    LcpOpt::Mru(1492).into(),
+                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                        .into(),
+                    LcpOpt::MagicNumber(1337).into(),
                 ],
             )),
         );
@@ -561,15 +557,15 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_configure_ack(
+                PPPFullPkt::new_lcp(LcpPkt::new_configure_ack(
                     0x41,
                     vec![
-                        LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(
+                        LcpOpt::Mru(1492).into(),
+                        LcpOpt::AuthenticationProtocol(
                             AuthProtocol::Chap(ChapAlgorithm::Md5).into()
                         )
                         .into(),
-                        LCPOptionPayload::MagicNumber(1337).into()
+                        LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
             )
@@ -583,15 +579,13 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_configure_nak(
+            PPPFullPkt::new_lcp(LcpPkt::new_configure_nak(
                 0x41,
                 vec![
-                    LCPOptionPayload::MRU(1492).into(),
-                    LCPOptionPayload::AuthenticationProtocol(
-                        AuthProtocol::Chap(ChapAlgorithm::Md5).into(),
-                    )
-                    .into(),
-                    LCPOptionPayload::MagicNumber(1337).into(),
+                    LcpOpt::Mru(1492).into(),
+                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                        .into(),
+                    LcpOpt::MagicNumber(1337).into(),
                 ],
             )),
         );
@@ -627,15 +621,15 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_configure_nak(
+                PPPFullPkt::new_lcp(LcpPkt::new_configure_nak(
                     0x41,
                     vec![
-                        LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(
+                        LcpOpt::Mru(1492).into(),
+                        LcpOpt::AuthenticationProtocol(
                             AuthProtocol::Chap(ChapAlgorithm::Md5).into()
                         )
                         .into(),
-                        LCPOptionPayload::MagicNumber(1337).into()
+                        LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
             )
@@ -649,15 +643,13 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_configure_reject(
+            PPPFullPkt::new_lcp(LcpPkt::new_configure_reject(
                 0x41,
                 vec![
-                    LCPOptionPayload::MRU(1492).into(),
-                    LCPOptionPayload::AuthenticationProtocol(
-                        AuthProtocol::Chap(ChapAlgorithm::Md5).into(),
-                    )
-                    .into(),
-                    LCPOptionPayload::MagicNumber(1337).into(),
+                    LcpOpt::Mru(1492).into(),
+                    LcpOpt::AuthenticationProtocol(AuthProtocol::Chap(ChapAlgorithm::Md5).into())
+                        .into(),
+                    LcpOpt::MagicNumber(1337).into(),
                 ],
             )),
         );
@@ -693,15 +685,15 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_configure_reject(
+                PPPFullPkt::new_lcp(LcpPkt::new_configure_reject(
                     0x41,
                     vec![
-                        LCPOptionPayload::MRU(1492).into(),
-                        LCPOptionPayload::AuthenticationProtocol(
+                        LcpOpt::Mru(1492).into(),
+                        LcpOpt::AuthenticationProtocol(
                             AuthProtocol::Chap(ChapAlgorithm::Md5).into()
                         )
                         .into(),
-                        LCPOptionPayload::MagicNumber(1337).into()
+                        LcpOpt::MagicNumber(1337).into()
                     ]
                 ))
             )
@@ -715,7 +707,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_terminate_request(0x41, vec![0x41, 0x41])),
+            PPPFullPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -747,7 +739,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_terminate_request(0x41, vec![0x41, 0x41]))
+                PPPFullPkt::new_lcp(LcpPkt::new_terminate_request(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -759,7 +751,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_terminate_ack(0x41, vec![0x41, 0x41])),
+            PPPFullPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -791,7 +783,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_terminate_ack(0x41, vec![0x41, 0x41]))
+                PPPFullPkt::new_lcp(LcpPkt::new_terminate_ack(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -803,7 +795,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_code_reject(0x41, vec![0x41, 0x41])),
+            PPPFullPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -835,7 +827,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_code_reject(0x41, vec![0x41, 0x41]))
+                PPPFullPkt::new_lcp(LcpPkt::new_code_reject(0x41, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -847,11 +839,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_protocol_reject(
-                0x41,
-                0x1337,
-                vec![0x41, 0x41],
-            )),
+            PPPFullPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -885,11 +873,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_protocol_reject(
-                    0x41,
-                    0x1337,
-                    vec![0x41, 0x41]
-                ))
+                PPPFullPkt::new_lcp(LcpPkt::new_protocol_reject(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -901,7 +885,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41])),
+            PPPFullPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -935,7 +919,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41]))
+                PPPFullPkt::new_lcp(LcpPkt::new_echo_request(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -947,7 +931,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41])),
+            PPPFullPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -981,7 +965,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41]))
+                PPPFullPkt::new_lcp(LcpPkt::new_echo_reply(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())
@@ -993,11 +977,7 @@ mod tests {
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
             [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
             1,
-            PPPFullPkt::new_lcp(LCPFullPkt::new_discard_request(
-                0x41,
-                0x1337,
-                vec![0x41, 0x41],
-            )),
+            PPPFullPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41])),
         );
 
         let mut buf = Vec::new();
@@ -1031,11 +1011,7 @@ mod tests {
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x02].into(),
                 [0x00, 0x00, 0x5e, 0x00, 0x53, 0x01].into(),
                 1,
-                PPPFullPkt::new_lcp(LCPFullPkt::new_discard_request(
-                    0x41,
-                    0x1337,
-                    vec![0x41, 0x41]
-                ))
+                PPPFullPkt::new_lcp(LcpPkt::new_discard_request(0x41, 0x1337, vec![0x41, 0x41]))
             )
         );
         Ok(())

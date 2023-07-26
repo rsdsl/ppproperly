@@ -1,4 +1,4 @@
-use crate::{Deserialize, Error, LCPFullPkt, PAPFullPkt, Result, Serialize};
+use crate::{Deserialize, Error, LcpPkt, PAPFullPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -205,13 +205,13 @@ impl From<QualityProtocol> for QualityProtocolInfo {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PPPPkt {
-    Lcp(LCPFullPkt),
+    Lcp(LcpPkt),
     Pap(PAPFullPkt),
 }
 
 impl Default for PPPPkt {
     fn default() -> Self {
-        Self::Lcp(LCPFullPkt::default())
+        Self::Lcp(LcpPkt::default())
     }
 }
 
@@ -246,7 +246,7 @@ impl PPPPkt {
     ) -> Result<()> {
         match *discriminant {
             LCP => {
-                let mut tmp = LCPFullPkt::default();
+                let mut tmp = LcpPkt::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::Lcp(tmp);
@@ -271,7 +271,7 @@ pub struct PPPFullPkt {
 }
 
 impl PPPFullPkt {
-    pub fn new_lcp(lcp: LCPFullPkt) -> Self {
+    pub fn new_lcp(lcp: LcpPkt) -> Self {
         Self {
             payload: PPPPkt::Lcp(lcp),
         }

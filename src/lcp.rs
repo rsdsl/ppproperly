@@ -24,8 +24,8 @@ const OPT_PROTOCOL_FIELD_COMPRESSION: u8 = 7;
 const OPT_ADDR_CTL_FIELD_COMPRESSION: u8 = 8;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum LCPOptionPayload {
-    MRU(u16),
+pub enum LcpOpt {
+    Mru(u16),
     AuthenticationProtocol(AuthProtocolInfo),
     QualityProtocol(QualityProtocolInfo),
     MagicNumber(u32),
@@ -33,10 +33,10 @@ pub enum LCPOptionPayload {
     AddrCtlFieldCompression,
 }
 
-impl Serialize for LCPOptionPayload {
+impl Serialize for LcpOpt {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
-            Self::MRU(payload) => payload.serialize(w),
+            Self::Mru(payload) => payload.serialize(w),
             Self::AuthenticationProtocol(payload) => payload.serialize(w),
             Self::QualityProtocol(payload) => payload.serialize(w),
             Self::MagicNumber(payload) => payload.serialize(w),
@@ -46,10 +46,10 @@ impl Serialize for LCPOptionPayload {
     }
 }
 
-impl LCPOptionPayload {
+impl LcpOpt {
     fn discriminant(&self) -> u8 {
         match self {
-            Self::MRU(_) => OPT_MRU,
+            Self::Mru(_) => OPT_MRU,
             Self::AuthenticationProtocol(_) => OPT_AUTHENTICATION_PROTOCOL,
             Self::QualityProtocol(_) => OPT_QUALITY_PROTOCOL,
             Self::MagicNumber(_) => OPT_MAGIC_NUMBER,
@@ -60,7 +60,7 @@ impl LCPOptionPayload {
 
     fn len(&self) -> u8 {
         match self {
-            Self::MRU(_) => 2,
+            Self::Mru(_) => 2,
             Self::AuthenticationProtocol(payload) => payload.len(),
             Self::QualityProtocol(payload) => payload.len(),
             Self::MagicNumber(_) => 4,
@@ -79,7 +79,7 @@ impl LCPOptionPayload {
                 let mut tmp = u16::default();
 
                 tmp.deserialize(r)?;
-                *self = Self::MRU(tmp);
+                *self = Self::Mru(tmp);
             }
             OPT_AUTHENTICATION_PROTOCOL => {
                 let mut tmp = AuthProtocolInfo::default();
@@ -113,15 +113,15 @@ impl LCPOptionPayload {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPOption {
-    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
-    #[ppproperly(len_for(field = "payload", offset = 2, data_type = "u8"))]
-    payload: LCPOptionPayload,
+pub struct LcpOption {
+    #[ppproperly(discriminant_for(field = "value", data_type = "u8"))]
+    #[ppproperly(len_for(field = "value", offset = 2, data_type = "u8"))]
+    value: LcpOpt,
 }
 
-impl LCPOption {
+impl LcpOption {
     pub fn len(&self) -> u8 {
-        2 + self.payload.len()
+        2 + self.value.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -129,13 +129,13 @@ impl LCPOption {
     }
 }
 
-impl From<LCPOptionPayload> for LCPOption {
-    fn from(payload: LCPOptionPayload) -> Self {
-        Self { payload }
+impl From<LcpOpt> for LcpOption {
+    fn from(value: LcpOpt) -> Self {
+        Self { value }
     }
 }
 
-impl Serialize for [LCPOption] {
+impl Serialize for [LcpOption] {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         for option in self {
             option.serialize(w)?;
@@ -145,10 +145,10 @@ impl Serialize for [LCPOption] {
     }
 }
 
-impl Deserialize for Vec<LCPOption> {
+impl Deserialize for Vec<LcpOption> {
     fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
         while r.bytes().size_hint().0 > 0 {
-            let mut tmp = LCPOption::from(LCPOptionPayload::MagicNumber(0));
+            let mut tmp = LcpOption::from(LcpOpt::MagicNumber(0));
 
             tmp.deserialize(r)?;
             self.push(tmp);
@@ -159,27 +159,27 @@ impl Deserialize for Vec<LCPOption> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum LCPPkt {
-    ConfigureRequest(LCPConfigureRequest),
-    ConfigureAck(LCPConfigureAck),
-    ConfigureNak(LCPConfigureNak),
-    ConfigureReject(LCPConfigureReject),
-    TerminateRequest(LCPTerminateRequest),
-    TerminateAck(LCPTerminateAck),
-    CodeReject(LCPCodeReject),
-    ProtocolReject(LCPProtocolReject),
-    EchoRequest(LCPEchoRequest),
-    EchoReply(LCPEchoReply),
-    DiscardRequest(LCPDiscardRequest),
+pub enum LcpData {
+    ConfigureRequest(LcpConfigureRequest),
+    ConfigureAck(LcpConfigureAck),
+    ConfigureNak(LcpConfigureNak),
+    ConfigureReject(LcpConfigureReject),
+    TerminateRequest(LcpTerminateRequest),
+    TerminateAck(LcpTerminateAck),
+    CodeReject(LcpCodeReject),
+    ProtocolReject(LcpProtocolReject),
+    EchoRequest(LcpEchoRequest),
+    EchoReply(LcpEchoReply),
+    DiscardRequest(LcpDiscardRequest),
 }
 
-impl Default for LCPPkt {
+impl Default for LcpData {
     fn default() -> Self {
-        Self::ConfigureRequest(LCPConfigureRequest::default())
+        Self::ConfigureRequest(LcpConfigureRequest::default())
     }
 }
 
-impl Serialize for LCPPkt {
+impl Serialize for LcpData {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::ConfigureRequest(payload) => payload.serialize(w),
@@ -197,7 +197,7 @@ impl Serialize for LCPPkt {
     }
 }
 
-impl LCPPkt {
+impl LcpData {
     fn discriminant(&self) -> u8 {
         match self {
             Self::ConfigureRequest(_) => LCP_CONFIGURE_REQUEST,
@@ -237,67 +237,67 @@ impl LCPPkt {
     ) -> Result<()> {
         match *discriminant {
             LCP_CONFIGURE_REQUEST => {
-                let mut tmp = LCPConfigureRequest::default();
+                let mut tmp = LcpConfigureRequest::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::ConfigureRequest(tmp);
             }
             LCP_CONFIGURE_ACK => {
-                let mut tmp = LCPConfigureAck::default();
+                let mut tmp = LcpConfigureAck::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::ConfigureAck(tmp);
             }
             LCP_CONFIGURE_NAK => {
-                let mut tmp = LCPConfigureNak::default();
+                let mut tmp = LcpConfigureNak::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::ConfigureNak(tmp);
             }
             LCP_CONFIGURE_REJECT => {
-                let mut tmp = LCPConfigureReject::default();
+                let mut tmp = LcpConfigureReject::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::ConfigureReject(tmp);
             }
             LCP_TERMINATE_REQUEST => {
-                let mut tmp = LCPTerminateRequest::default();
+                let mut tmp = LcpTerminateRequest::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::TerminateRequest(tmp);
             }
             LCP_TERMINATE_ACK => {
-                let mut tmp = LCPTerminateAck::default();
+                let mut tmp = LcpTerminateAck::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::TerminateAck(tmp);
             }
             LCP_CODE_REJECT => {
-                let mut tmp = LCPCodeReject::default();
+                let mut tmp = LcpCodeReject::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::CodeReject(tmp);
             }
             LCP_PROTOCOL_REJECT => {
-                let mut tmp = LCPProtocolReject::default();
+                let mut tmp = LcpProtocolReject::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::ProtocolReject(tmp);
             }
             LCP_ECHO_REQUEST => {
-                let mut tmp = LCPEchoRequest::default();
+                let mut tmp = LcpEchoRequest::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::EchoRequest(tmp);
             }
             LCP_ECHO_REPLY => {
-                let mut tmp = LCPEchoReply::default();
+                let mut tmp = LcpEchoReply::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::EchoReply(tmp);
             }
             LCP_DISCARD_REQUEST => {
-                let mut tmp = LCPDiscardRequest::default();
+                let mut tmp = LcpDiscardRequest::default();
 
                 tmp.deserialize(r)?;
                 *self = Self::DiscardRequest(tmp);
@@ -310,93 +310,93 @@ impl LCPPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPFullPkt {
-    #[ppproperly(discriminant_for(field = "payload", data_type = "u8"))]
+pub struct LcpPkt {
+    #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
     identifier: u8,
-    #[ppproperly(len_for(field = "payload", offset = 4, data_type = "u16"))]
-    payload: LCPPkt,
+    #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
+    data: LcpData,
 }
 
-impl LCPFullPkt {
-    pub fn new_configure_request(identifier: u8, options: Vec<LCPOption>) -> Self {
+impl LcpPkt {
+    pub fn new_configure_request(identifier: u8, options: Vec<LcpOption>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::ConfigureRequest(LCPConfigureRequest { options }),
+            data: LcpData::ConfigureRequest(LcpConfigureRequest { options }),
         }
     }
 
-    pub fn new_configure_ack(identifier: u8, options: Vec<LCPOption>) -> Self {
+    pub fn new_configure_ack(identifier: u8, options: Vec<LcpOption>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::ConfigureAck(LCPConfigureAck { options }),
+            data: LcpData::ConfigureAck(LcpConfigureAck { options }),
         }
     }
 
-    pub fn new_configure_nak(identifier: u8, options: Vec<LCPOption>) -> Self {
+    pub fn new_configure_nak(identifier: u8, options: Vec<LcpOption>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::ConfigureNak(LCPConfigureNak { options }),
+            data: LcpData::ConfigureNak(LcpConfigureNak { options }),
         }
     }
 
-    pub fn new_configure_reject(identifier: u8, options: Vec<LCPOption>) -> Self {
+    pub fn new_configure_reject(identifier: u8, options: Vec<LcpOption>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::ConfigureReject(LCPConfigureReject { options }),
+            data: LcpData::ConfigureReject(LcpConfigureReject { options }),
         }
     }
 
     pub fn new_terminate_request(identifier: u8, data: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::TerminateRequest(LCPTerminateRequest { data }),
+            data: LcpData::TerminateRequest(LcpTerminateRequest { data }),
         }
     }
 
     pub fn new_terminate_ack(identifier: u8, data: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::TerminateAck(LCPTerminateAck { data }),
+            data: LcpData::TerminateAck(LcpTerminateAck { data }),
         }
     }
 
     pub fn new_code_reject(identifier: u8, pkt: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::CodeReject(LCPCodeReject { pkt }),
+            data: LcpData::CodeReject(LcpCodeReject { pkt }),
         }
     }
 
     pub fn new_protocol_reject(identifier: u8, protocol: u16, pkt: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::ProtocolReject(LCPProtocolReject { protocol, pkt }),
+            data: LcpData::ProtocolReject(LcpProtocolReject { protocol, pkt }),
         }
     }
 
     pub fn new_echo_request(identifier: u8, magic: u32, data: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::EchoRequest(LCPEchoRequest { magic, data }),
+            data: LcpData::EchoRequest(LcpEchoRequest { magic, data }),
         }
     }
 
     pub fn new_echo_reply(identifier: u8, magic: u32, data: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::EchoReply(LCPEchoReply { magic, data }),
+            data: LcpData::EchoReply(LcpEchoReply { magic, data }),
         }
     }
 
     pub fn new_discard_request(identifier: u8, magic: u32, data: Vec<u8>) -> Self {
         Self {
             identifier,
-            payload: LCPPkt::DiscardRequest(LCPDiscardRequest { magic, data }),
+            data: LcpData::DiscardRequest(LcpDiscardRequest { magic, data }),
         }
     }
 
     pub fn len(&self) -> u16 {
-        4 + self.payload.len()
+        4 + self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -405,11 +405,11 @@ impl LCPFullPkt {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPConfigureRequest {
-    options: Vec<LCPOption>,
+pub struct LcpConfigureRequest {
+    options: Vec<LcpOption>,
 }
 
-impl LCPConfigureRequest {
+impl LcpConfigureRequest {
     pub fn len(&self) -> u16 {
         self.options
             .iter()
@@ -425,11 +425,11 @@ impl LCPConfigureRequest {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPConfigureAck {
-    options: Vec<LCPOption>,
+pub struct LcpConfigureAck {
+    options: Vec<LcpOption>,
 }
 
-impl LCPConfigureAck {
+impl LcpConfigureAck {
     pub fn len(&self) -> u16 {
         self.options
             .iter()
@@ -445,11 +445,11 @@ impl LCPConfigureAck {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPConfigureNak {
-    options: Vec<LCPOption>,
+pub struct LcpConfigureNak {
+    options: Vec<LcpOption>,
 }
 
-impl LCPConfigureNak {
+impl LcpConfigureNak {
     pub fn len(&self) -> u16 {
         self.options
             .iter()
@@ -465,11 +465,11 @@ impl LCPConfigureNak {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPConfigureReject {
-    options: Vec<LCPOption>,
+pub struct LcpConfigureReject {
+    options: Vec<LcpOption>,
 }
 
-impl LCPConfigureReject {
+impl LcpConfigureReject {
     pub fn len(&self) -> u16 {
         self.options
             .iter()
@@ -485,13 +485,13 @@ impl LCPConfigureReject {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPTerminateRequest {
+pub struct LcpTerminateRequest {
     data: Vec<u8>,
 }
 
-impl LCPTerminateRequest {
+impl LcpTerminateRequest {
     pub fn len(&self) -> u16 {
-        u16::try_from(self.data.len()).unwrap()
+        self.data.len().try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -500,13 +500,13 @@ impl LCPTerminateRequest {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPTerminateAck {
+pub struct LcpTerminateAck {
     data: Vec<u8>,
 }
 
-impl LCPTerminateAck {
+impl LcpTerminateAck {
     pub fn len(&self) -> u16 {
-        u16::try_from(self.data.len()).unwrap()
+        self.data.len().try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -515,13 +515,13 @@ impl LCPTerminateAck {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPCodeReject {
+pub struct LcpCodeReject {
     pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
-impl LCPCodeReject {
+impl LcpCodeReject {
     pub fn len(&self) -> u16 {
-        u16::try_from(self.pkt.len()).unwrap()
+        self.pkt.len().try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -530,14 +530,14 @@ impl LCPCodeReject {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPProtocolReject {
+pub struct LcpProtocolReject {
     protocol: u16,
     pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
-impl LCPProtocolReject {
+impl LcpProtocolReject {
     pub fn len(&self) -> u16 {
-        2 + u16::try_from(self.pkt.len()).unwrap()
+        (2 + self.pkt.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -546,14 +546,14 @@ impl LCPProtocolReject {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPEchoRequest {
+pub struct LcpEchoRequest {
     magic: u32,
     data: Vec<u8>,
 }
 
-impl LCPEchoRequest {
+impl LcpEchoRequest {
     pub fn len(&self) -> u16 {
-        4 + u16::try_from(self.data.len()).unwrap()
+        (4 + self.data.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -562,14 +562,14 @@ impl LCPEchoRequest {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPEchoReply {
+pub struct LcpEchoReply {
     magic: u32,
     data: Vec<u8>,
 }
 
-impl LCPEchoReply {
+impl LcpEchoReply {
     pub fn len(&self) -> u16 {
-        4 + u16::try_from(self.data.len()).unwrap()
+        (4 + self.data.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -578,14 +578,14 @@ impl LCPEchoReply {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-pub struct LCPDiscardRequest {
+pub struct LcpDiscardRequest {
     magic: u32,
     data: Vec<u8>,
 }
 
-impl LCPDiscardRequest {
+impl LcpDiscardRequest {
     pub fn len(&self) -> u16 {
-        4 + u16::try_from(self.data.len()).unwrap()
+        (4 + self.data.len()).try_into().unwrap()
     }
 
     pub fn is_empty(&self) -> bool {
