@@ -1,3 +1,6 @@
+pub mod chap;
+pub use chap::*;
+
 pub mod de;
 pub use de::*;
 

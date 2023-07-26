@@ -38,6 +38,8 @@ pub enum Error {
     #[error("invalid PAP code: {0}")]
     InvalidPAPCode(u8),
 
+    #[error("invalid CHAP code: {0}")]
+    InvalidCHAPCode(u8),
     #[error("invalid CHAP algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 
