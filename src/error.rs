@@ -5,45 +5,35 @@ use thiserror::Error;
 /// Any ppproperly or library error.
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("invalid EtherType: {0}")]
+    #[error("invalid ethertype: {0}")]
     InvalidEtherType(u16),
-    #[error("invalid PPPoE code: {0}")]
-    InvalidPPPoECode(u8),
-    #[error("invalid PPPoE tag: {0}")]
-    InvalidPPPoETag(u16),
-    #[error("missing service name")]
-    MissingServiceName,
-    #[error("missing access concentrator name")]
-    MissingACName,
-    #[error("invalid number of tags: expected {0}, got {1}")]
-    InvalidNumberOfTags(usize, usize),
-    #[error("non-zero session ID: {0}")]
-    NonZeroSessionID(u16),
-    #[error("PADI size exceeds 1484 bytes")]
-    PADITooBig(u16),
+    #[error("invalid pppoe code: {0}")]
+    InvalidPppoeCode(u8),
+    #[error("invalid pppoe tag: {0}")]
+    InvalidPppoeTag(u16),
 
-    #[error("invalid PPP protocol: {0}")]
-    InvalidPPPProtocol(u16),
+    #[error("invalid ppp protocol: {0}")]
+    InvalidPppProtocol(u16),
 
-    #[error("invalid LCP code: {0}")]
-    InvalidLCPCode(u8),
-    #[error("invalid LCP option type: {0}")]
-    InvalidLCPOptionType(u8),
+    #[error("invalid lcp code: {0}")]
+    InvalidLcpCode(u8),
+    #[error("invalid lcp option type: {0}")]
+    InvalidLcpOptionType(u8),
 
     #[error("invalid authentication protocol: {0}")]
     InvalidAuthProtocol(u16),
     #[error("invalid quality protocol: {0}")]
     InvalidQualityProtocol(u16),
 
-    #[error("invalid PAP code: {0}")]
-    InvalidPAPCode(u8),
+    #[error("invalid pap code: {0}")]
+    InvalidPapCode(u8),
 
-    #[error("invalid CHAP code: {0}")]
-    InvalidCHAPCode(u8),
-    #[error("invalid CHAP algorithm: {0}")]
+    #[error("invalid chap code: {0}")]
+    InvalidChapCode(u8),
+    #[error("invalid chap algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 
-    #[error("conversion from UTF-8: {0}")]
+    #[error("conversion from utf8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]
     Io(#[from] io::Error),

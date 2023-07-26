@@ -72,7 +72,7 @@ impl PAPPkt {
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticateNak(tmp);
             }
-            _ => return Err(Error::InvalidPAPCode(*discriminant)),
+            _ => return Err(Error::InvalidPapCode(*discriminant)),
         }
 
         Ok(())

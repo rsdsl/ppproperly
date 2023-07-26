@@ -130,7 +130,7 @@ impl TryFrom<u8> for PPPoECode {
             PADR => Ok(Self::Padr),
             PADS => Ok(Self::Pads),
             PADT => Ok(Self::Padt),
-            _ => Err(Error::InvalidPPPoECode(code)),
+            _ => Err(Error::InvalidPppoeCode(code)),
         }
     }
 }
@@ -322,7 +322,7 @@ impl PPPoETagPayload {
                 tmp.deserialize(r)?;
                 *self = Self::VendorSpecific(tmp);
             }
-            _ => return Err(Error::InvalidPPPoETag(*discriminant)),
+            _ => return Err(Error::InvalidPppoeTag(*discriminant)),
         }
 
         Ok(())
@@ -469,7 +469,7 @@ impl PPPoEPkt {
                 tmp.deserialize(r)?;
                 *self = Self::Padt(tmp);
             }
-            _ => return Err(Error::InvalidPPPoECode(*discriminant)),
+            _ => return Err(Error::InvalidPppoeCode(*discriminant)),
         }
 
         Ok(())

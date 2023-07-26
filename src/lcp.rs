@@ -105,7 +105,7 @@ impl LCPOptionPayload {
             OPT_ADDR_CTL_FIELD_COMPRESSION => {
                 *self = Self::AddrCtlFieldCompression;
             }
-            _ => return Err(Error::InvalidLCPOptionType(*discriminant)),
+            _ => return Err(Error::InvalidLcpOptionType(*discriminant)),
         }
 
         Ok(())
@@ -302,7 +302,7 @@ impl LCPPkt {
                 tmp.deserialize(r)?;
                 *self = Self::DiscardRequest(tmp);
             }
-            _ => return Err(Error::InvalidLCPCode(*discriminant)),
+            _ => return Err(Error::InvalidLcpCode(*discriminant)),
         }
 
         Ok(())

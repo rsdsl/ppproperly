@@ -257,7 +257,7 @@ impl PPPPkt {
                 tmp.deserialize(r)?;
                 *self = Self::Pap(tmp);
             }
-            _ => return Err(Error::InvalidPPPProtocol(*discriminant)),
+            _ => return Err(Error::InvalidPppProtocol(*discriminant)),
         }
 
         Ok(())
