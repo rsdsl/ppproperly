@@ -1,4 +1,4 @@
-use crate::{ChapPkt, Deserialize, Error, LcpPkt, PapPkt, Result, Serialize};
+use crate::{ChapPkt, Deserialize, Error, IpcpPkt, LcpPkt, PapPkt, Result, Serialize};
 
 use std::io::{Read, Write};
 
@@ -7,7 +7,10 @@ use ppproperly_macros::{Deserialize, Serialize};
 const LCP: u16 = 0xc021;
 const PAP: u16 = 0xc023;
 const CHAP: u16 = 0xc223;
+const IPCP: u16 = 0x8021;
+
 const LQR: u16 = 0xc025;
+const VAN_JACOBSON: u16 = 0x002d;
 
 const CHAP_MD5: u8 = 5;
 
@@ -204,10 +207,100 @@ impl From<QualityProto> for QualityProtocol {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub enum IpCompressionProto {
+    VanJacobsonTcpIp(VanJacobsonConfig),
+}
+
+impl Default for IpCompressionProto {
+    fn default() -> Self {
+        Self::VanJacobsonTcpIp(VanJacobsonConfig::default())
+    }
+}
+
+impl Serialize for IpCompressionProto {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        match self {
+            Self::VanJacobsonTcpIp(payload) => payload.serialize(w),
+        }
+    }
+}
+
+impl IpCompressionProto {
+    fn discriminant(&self) -> u16 {
+        match self {
+            Self::VanJacobsonTcpIp(_) => VAN_JACOBSON,
+        }
+    }
+
+    fn len(&self) -> u8 {
+        match self {
+            Self::VanJacobsonTcpIp(payload) => payload.len(),
+        }
+    }
+
+    fn deserialize_with_discriminant<R: Read>(
+        &mut self,
+        r: &mut R,
+        discriminant: &u16,
+    ) -> Result<()> {
+        match *discriminant {
+            VAN_JACOBSON => {
+                let mut tmp = VanJacobsonConfig::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::VanJacobsonTcpIp(tmp);
+            }
+            _ => return Err(Error::InvalidIpCompressionProtocol(*discriminant)),
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct IpCompressionProtocol {
+    #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
+    protocol: IpCompressionProto,
+}
+
+impl IpCompressionProtocol {
+    pub fn len(&self) -> u8 {
+        2 + self.protocol.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 2
+    }
+}
+
+impl From<IpCompressionProto> for IpCompressionProtocol {
+    fn from(protocol: IpCompressionProto) -> Self {
+        Self { protocol }
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+pub struct VanJacobsonConfig {
+    max_slot_id: u8,
+    comp_slot_id: u8,
+}
+
+impl VanJacobsonConfig {
+    pub fn len(&self) -> u8 {
+        2
+    }
+
+    pub fn is_empty(&self) -> bool {
+        true
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PppData {
     Lcp(LcpPkt),
     Pap(PapPkt),
     Chap(ChapPkt),
+    Ipcp(IpcpPkt),
 }
 
 impl Default for PppData {
@@ -222,6 +315,7 @@ impl Serialize for PppData {
             Self::Lcp(payload) => payload.serialize(w),
             Self::Pap(payload) => payload.serialize(w),
             Self::Chap(payload) => payload.serialize(w),
+            Self::Ipcp(payload) => payload.serialize(w),
         }
     }
 }
@@ -232,6 +326,7 @@ impl PppData {
             Self::Lcp(_) => LCP,
             Self::Pap(_) => PAP,
             Self::Chap(_) => CHAP,
+            Self::Ipcp(_) => IPCP,
         }
     }
 
@@ -240,6 +335,7 @@ impl PppData {
             Self::Lcp(payload) => payload.len(),
             Self::Pap(payload) => payload.len(),
             Self::Chap(payload) => payload.len(),
+            Self::Ipcp(payload) => payload.len(),
         }
     }
 
@@ -266,6 +362,12 @@ impl PppData {
 
                 tmp.deserialize(r)?;
                 *self = Self::Chap(tmp);
+            }
+            IPCP => {
+                let mut tmp = IpcpPkt::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::Ipcp(tmp);
             }
             _ => return Err(Error::InvalidPppProtocol(*discriminant)),
         }
@@ -296,6 +398,12 @@ impl PppPkt {
     pub fn new_chap(chap: ChapPkt) -> Self {
         Self {
             data: PppData::Chap(chap),
+        }
+    }
+
+    pub fn new_ipcp(ipcp: IpcpPkt) -> Self {
+        Self {
+            data: PppData::Ipcp(ipcp),
         }
     }
 

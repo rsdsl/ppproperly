@@ -33,6 +33,14 @@ pub enum Error {
     #[error("invalid chap algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 
+    #[error("invalid ipcp code: {0}")]
+    InvalidIpcpCode(u8),
+    #[error("invalid ipcp option type: {0}")]
+    InvalidIpcpOptionType(u8),
+
+    #[error("invalid ip compression protocol: {0}")]
+    InvalidIpCompressionProtocol(u16),
+
     #[error("conversion from utf8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]

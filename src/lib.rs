@@ -7,6 +7,9 @@ pub use de::*;
 pub mod error;
 pub use error::*;
 
+pub mod ipcp;
+pub use ipcp::*;
+
 pub mod lcp;
 pub use lcp::*;
 

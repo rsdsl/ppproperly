@@ -33,3 +33,28 @@ impl Deserialize for VerType {
         self.0.deserialize(r)
     }
 }
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Ipv4Addr(pub std::net::Ipv4Addr);
+
+impl Default for Ipv4Addr {
+    fn default() -> Self {
+        Self(std::net::Ipv4Addr::UNSPECIFIED)
+    }
+}
+
+impl Serialize for Ipv4Addr {
+    fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
+        u32::from(self.0).serialize(w)
+    }
+}
+
+impl Deserialize for Ipv4Addr {
+    fn deserialize<R: Read>(&mut self, r: &mut R) -> Result<()> {
+        let mut tmp = u32::default();
+        tmp.deserialize(r)?;
+
+        self.0 = tmp.into();
+        Ok(())
+    }
+}
