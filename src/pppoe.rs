@@ -30,7 +30,7 @@ const TAG_SERVICE_NAME: u16 = 0x0101;
 const TAG_SERVICE_NAME_ERROR: u16 = 0x0201;
 const TAG_VENDOR_SPECIFIC: u16 = 0x0105;
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct MacAddr(pub [u8; 6]);
 
 impl MacAddr {
