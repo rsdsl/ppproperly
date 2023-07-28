@@ -322,7 +322,7 @@ impl PppoeVal {
 pub struct PppoeTag {
     #[ppproperly(discriminant_for(field = "data", data_type = "u16"))]
     #[ppproperly(len_for(field = "data", offset = 0, data_type = "u16"))]
-    data: PppoeVal,
+    pub data: PppoeVal,
 }
 
 impl PppoeTag {
