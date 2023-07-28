@@ -467,14 +467,14 @@ impl PppoeData {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PppoePkt {
-    dst_mac: MacAddr,
-    src_mac: MacAddr,
-    ether_type: EtherType,
-    ver_type: VerType,
+    pub dst_mac: MacAddr,
+    pub src_mac: MacAddr,
+    pub ether_type: EtherType,
+    pub ver_type: VerType,
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    session_id: u16,
+    pub session_id: u16,
     #[ppproperly(len_for(field = "data", offset = 0, data_type = "u16"))]
-    data: PppoeData,
+    pub data: PppoeData,
 }
 
 impl PppoePkt {
