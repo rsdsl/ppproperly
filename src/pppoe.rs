@@ -1,5 +1,6 @@
 use crate::{Deserialize, Error, PppPkt, Result, Serialize, VerType};
 
+use std::fmt::{self, Display};
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -36,6 +37,16 @@ pub struct MacAddr(pub [u8; 6]);
 impl MacAddr {
     pub const UNSPECIFIED: MacAddr = MacAddr([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
     pub const BROADCAST: MacAddr = MacAddr([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
+}
+
+impl Display for MacAddr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}:{}:{}:{}:{}:{}",
+            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4], self.0[5]
+        )
+    }
 }
 
 impl From<[u8; 6]> for MacAddr {
