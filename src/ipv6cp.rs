@@ -63,7 +63,7 @@ impl Ipv6cpOpt {
 pub struct Ipv6cpOption {
     #[ppproperly(discriminant_for(field = "value", data_type = "u8"))]
     #[ppproperly(len_for(field = "value", offset = 2, data_type = "u8"))]
-    value: Ipv6cpOpt,
+    pub value: Ipv6cpOpt,
 }
 
 impl Ipv6cpOption {
@@ -219,9 +219,9 @@ impl Ipv6cpData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    identifier: u8,
+    pub identifier: u8,
     #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
-    data: Ipv6cpData,
+    pub data: Ipv6cpData,
 }
 
 impl Ipv6cpPkt {
@@ -285,7 +285,7 @@ impl Ipv6cpPkt {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureRequest {
-    options: Vec<Ipv6cpOption>,
+    pub options: Vec<Ipv6cpOption>,
 }
 
 impl Ipv6cpConfigureRequest {
@@ -305,7 +305,7 @@ impl Ipv6cpConfigureRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureAck {
-    options: Vec<Ipv6cpOption>,
+    pub options: Vec<Ipv6cpOption>,
 }
 
 impl Ipv6cpConfigureAck {
@@ -325,7 +325,7 @@ impl Ipv6cpConfigureAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureNak {
-    options: Vec<Ipv6cpOption>,
+    pub options: Vec<Ipv6cpOption>,
 }
 
 impl Ipv6cpConfigureNak {
@@ -345,7 +345,7 @@ impl Ipv6cpConfigureNak {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureReject {
-    options: Vec<Ipv6cpOption>,
+    pub options: Vec<Ipv6cpOption>,
 }
 
 impl Ipv6cpConfigureReject {
@@ -365,7 +365,7 @@ impl Ipv6cpConfigureReject {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpTerminateRequest {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl Ipv6cpTerminateRequest {
@@ -380,7 +380,7 @@ impl Ipv6cpTerminateRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpTerminateAck {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl Ipv6cpTerminateAck {
@@ -395,7 +395,7 @@ impl Ipv6cpTerminateAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpCodeReject {
-    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
+    pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
 impl Ipv6cpCodeReject {
