@@ -116,7 +116,7 @@ impl LcpOpt {
 pub struct LcpOption {
     #[ppproperly(discriminant_for(field = "value", data_type = "u8"))]
     #[ppproperly(len_for(field = "value", offset = 2, data_type = "u8"))]
-    value: LcpOpt,
+    pub value: LcpOpt,
 }
 
 impl LcpOption {
@@ -312,9 +312,9 @@ impl LcpData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    identifier: u8,
+    pub identifier: u8,
     #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
-    data: LcpData,
+    pub data: LcpData,
 }
 
 impl LcpPkt {
@@ -406,7 +406,7 @@ impl LcpPkt {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureRequest {
-    options: Vec<LcpOption>,
+    pub options: Vec<LcpOption>,
 }
 
 impl LcpConfigureRequest {
@@ -426,7 +426,7 @@ impl LcpConfigureRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureAck {
-    options: Vec<LcpOption>,
+    pub options: Vec<LcpOption>,
 }
 
 impl LcpConfigureAck {
@@ -446,7 +446,7 @@ impl LcpConfigureAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureNak {
-    options: Vec<LcpOption>,
+    pub options: Vec<LcpOption>,
 }
 
 impl LcpConfigureNak {
@@ -466,7 +466,7 @@ impl LcpConfigureNak {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureReject {
-    options: Vec<LcpOption>,
+    pub options: Vec<LcpOption>,
 }
 
 impl LcpConfigureReject {
@@ -486,7 +486,7 @@ impl LcpConfigureReject {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpTerminateRequest {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl LcpTerminateRequest {
@@ -501,7 +501,7 @@ impl LcpTerminateRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpTerminateAck {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl LcpTerminateAck {
@@ -516,7 +516,7 @@ impl LcpTerminateAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpCodeReject {
-    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
+    pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
 impl LcpCodeReject {
@@ -531,8 +531,8 @@ impl LcpCodeReject {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpProtocolReject {
-    protocol: u16,
-    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
+    pub protocol: u16,
+    pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
 impl LcpProtocolReject {
@@ -547,8 +547,8 @@ impl LcpProtocolReject {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpEchoRequest {
-    magic: u32,
-    data: Vec<u8>,
+    pub magic: u32,
+    pub data: Vec<u8>,
 }
 
 impl LcpEchoRequest {
@@ -563,8 +563,8 @@ impl LcpEchoRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpEchoReply {
-    magic: u32,
-    data: Vec<u8>,
+    pub magic: u32,
+    pub data: Vec<u8>,
 }
 
 impl LcpEchoReply {
@@ -579,8 +579,8 @@ impl LcpEchoReply {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpDiscardRequest {
-    magic: u32,
-    data: Vec<u8>,
+    pub magic: u32,
+    pub data: Vec<u8>,
 }
 
 impl LcpDiscardRequest {

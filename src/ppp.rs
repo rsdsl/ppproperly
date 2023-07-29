@@ -115,7 +115,7 @@ impl AuthProto {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AuthProtocol {
     #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
-    protocol: AuthProto,
+    pub protocol: AuthProto,
 }
 
 impl AuthProtocol {
@@ -188,7 +188,7 @@ impl QualityProto {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct QualityProtocol {
     #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
-    protocol: QualityProto,
+    pub protocol: QualityProto,
 }
 
 impl QualityProtocol {
@@ -261,7 +261,7 @@ impl IpCompressionProto {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpCompressionProtocol {
     #[ppproperly(discriminant_for(field = "protocol", data_type = "u16"))]
-    protocol: IpCompressionProto,
+    pub protocol: IpCompressionProto,
 }
 
 impl IpCompressionProtocol {
@@ -390,7 +390,7 @@ impl PppData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PppPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u16"))]
-    data: PppData,
+    pub data: PppData,
 }
 
 impl PppPkt {
