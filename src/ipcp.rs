@@ -76,7 +76,7 @@ impl IpcpOpt {
 pub struct IpcpOption {
     #[ppproperly(discriminant_for(field = "value", data_type = "u8"))]
     #[ppproperly(len_for(field = "value", offset = 2, data_type = "u8"))]
-    value: IpcpOpt,
+    pub value: IpcpOpt,
 }
 
 impl IpcpOption {
@@ -232,9 +232,9 @@ impl IpcpData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    identifier: u8,
+    pub identifier: u8,
     #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
-    data: IpcpData,
+    pub data: IpcpData,
 }
 
 impl IpcpPkt {
@@ -298,7 +298,7 @@ impl IpcpPkt {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureRequest {
-    options: Vec<IpcpOption>,
+    pub options: Vec<IpcpOption>,
 }
 
 impl IpcpConfigureRequest {
@@ -318,7 +318,7 @@ impl IpcpConfigureRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureAck {
-    options: Vec<IpcpOption>,
+    pub options: Vec<IpcpOption>,
 }
 
 impl IpcpConfigureAck {
@@ -338,7 +338,7 @@ impl IpcpConfigureAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureNak {
-    options: Vec<IpcpOption>,
+    pub options: Vec<IpcpOption>,
 }
 
 impl IpcpConfigureNak {
@@ -358,7 +358,7 @@ impl IpcpConfigureNak {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureReject {
-    options: Vec<IpcpOption>,
+    pub options: Vec<IpcpOption>,
 }
 
 impl IpcpConfigureReject {
@@ -378,7 +378,7 @@ impl IpcpConfigureReject {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpTerminateRequest {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl IpcpTerminateRequest {
@@ -393,7 +393,7 @@ impl IpcpTerminateRequest {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpTerminateAck {
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl IpcpTerminateAck {
@@ -408,7 +408,7 @@ impl IpcpTerminateAck {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpCodeReject {
-    pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
+    pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
 }
 
 impl IpcpCodeReject {
