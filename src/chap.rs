@@ -93,9 +93,9 @@ impl ChapData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    identifier: u8,
+    pub identifier: u8,
     #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
-    data: ChapData,
+    pub data: ChapData,
 }
 
 impl ChapPkt {
@@ -139,8 +139,8 @@ impl ChapPkt {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapChallenge {
     #[ppproperly(len_for(field = "value", offset = 0, data_type = "u8"))]
-    value: Vec<u8>,
-    name: String,
+    pub value: Vec<u8>,
+    pub name: String,
 }
 
 impl ChapChallenge {
@@ -156,8 +156,8 @@ impl ChapChallenge {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapResponse {
     #[ppproperly(len_for(field = "value", offset = 0, data_type = "u8"))]
-    value: Vec<u8>,
-    name: String,
+    pub value: Vec<u8>,
+    pub name: String,
 }
 
 impl ChapResponse {
@@ -172,7 +172,7 @@ impl ChapResponse {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapSuccess {
-    message: String,
+    pub message: String,
 }
 
 impl ChapSuccess {
@@ -187,7 +187,7 @@ impl ChapSuccess {
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapFailure {
-    message: String,
+    pub message: String,
 }
 
 impl ChapFailure {
