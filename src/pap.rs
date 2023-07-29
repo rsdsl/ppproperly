@@ -82,9 +82,9 @@ impl PapData {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapPkt {
     #[ppproperly(discriminant_for(field = "data", data_type = "u8"))]
-    identifier: u8,
+    pub identifier: u8,
     #[ppproperly(len_for(field = "data", offset = 4, data_type = "u16"))]
-    data: PapData,
+    pub data: PapData,
 }
 
 impl PapPkt {
@@ -121,9 +121,9 @@ impl PapPkt {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateRequest {
     #[ppproperly(len_for(field = "peer_id", offset = 0, data_type = "u8"))]
-    peer_id: String,
+    pub peer_id: String,
     #[ppproperly(len_for(field = "passwd", offset = 0, data_type = "u8"))]
-    passwd: String,
+    pub passwd: String,
 }
 
 impl PapAuthenticateRequest {
@@ -141,7 +141,7 @@ impl PapAuthenticateRequest {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateAck {
     #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
-    msg: String,
+    pub msg: String,
 }
 
 impl PapAuthenticateAck {
@@ -157,7 +157,7 @@ impl PapAuthenticateAck {
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateNak {
     #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
-    msg: String,
+    pub msg: String,
 }
 
 impl PapAuthenticateNak {
