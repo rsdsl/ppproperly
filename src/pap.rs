@@ -4,9 +4,9 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const PAP_AUTH_REQUEST: u8 = 1;
-const PAP_AUTH_ACK: u8 = 2;
-const PAP_AUTH_NAK: u8 = 3;
+pub const PAP_AUTH_REQUEST: u8 = 1;
+pub const PAP_AUTH_ACK: u8 = 2;
+pub const PAP_AUTH_NAK: u8 = 3;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PapData {

@@ -4,15 +4,15 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const IPV6CP_CONFIGURE_REQUEST: u8 = 1;
-const IPV6CP_CONFIGURE_ACK: u8 = 2;
-const IPV6CP_CONFIGURE_NAK: u8 = 3;
-const IPV6CP_CONFIGURE_REJECT: u8 = 4;
-const IPV6CP_TERMINATE_REQUEST: u8 = 5;
-const IPV6CP_TERMINATE_ACK: u8 = 6;
-const IPV6CP_CODE_REJECT: u8 = 7;
+pub const IPV6CP_CONFIGURE_REQUEST: u8 = 1;
+pub const IPV6CP_CONFIGURE_ACK: u8 = 2;
+pub const IPV6CP_CONFIGURE_NAK: u8 = 3;
+pub const IPV6CP_CONFIGURE_REJECT: u8 = 4;
+pub const IPV6CP_TERMINATE_REQUEST: u8 = 5;
+pub const IPV6CP_TERMINATE_ACK: u8 = 6;
+pub const IPV6CP_CODE_REJECT: u8 = 7;
 
-const OPT_INTERFACE_IDENTIFIER: u8 = 1;
+pub const OPT_INTERFACE_IDENTIFIER: u8 = 1;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Ipv6cpOpt {

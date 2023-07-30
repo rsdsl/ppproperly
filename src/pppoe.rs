@@ -5,31 +5,31 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const ETHER_TYPE_PPPOED: u16 = 0x8863;
-const ETHER_TYPE_PPPOES: u16 = 0x8864;
+pub const ETHER_TYPE_PPPOED: u16 = 0x8863;
+pub const ETHER_TYPE_PPPOES: u16 = 0x8864;
 
-const PPP: u8 = 0x00; // Pppoe Active Session PPP Packet
-const PADI: u8 = 0x09;
-const PADO: u8 = 0x07;
-const PADR: u8 = 0x19;
-const PADS: u8 = 0x65;
-const PADT: u8 = 0xa7;
+pub const PPP: u8 = 0x00; // Pppoe Active Session PPP Packet
+pub const PADI: u8 = 0x09;
+pub const PADO: u8 = 0x07;
+pub const PADR: u8 = 0x19;
+pub const PADS: u8 = 0x65;
+pub const PADT: u8 = 0xa7;
 
-const TAG_AC_COOKIE: u16 = 0x0104;
-const TAG_AC_NAME: u16 = 0x0102;
-const TAG_AC_SYSTEM_ERROR: u16 = 0x0202;
-const TAG_CREDITS: u16 = 0x0106;
-const TAG_CREDIT_SCALE_FACTOR: u16 = 0x0109;
-const TAG_END_OF_LIST: u16 = 0x0000;
-const TAG_GENERIC_ERROR: u16 = 0x0203;
-const TAG_HOST_UNIQ: u16 = 0x0103;
-const TAG_METRICS: u16 = 0x0107;
-const TAG_PPP_MAX_PAYLOAD: u16 = 0x0120;
-const TAG_RELAY_SESSION_ID: u16 = 0x0110;
-const TAG_SEQUENCE_NUMBER: u16 = 0x0108;
-const TAG_SERVICE_NAME: u16 = 0x0101;
-const TAG_SERVICE_NAME_ERROR: u16 = 0x0201;
-const TAG_VENDOR_SPECIFIC: u16 = 0x0105;
+pub const TAG_AC_COOKIE: u16 = 0x0104;
+pub const TAG_AC_NAME: u16 = 0x0102;
+pub const TAG_AC_SYSTEM_ERROR: u16 = 0x0202;
+pub const TAG_CREDITS: u16 = 0x0106;
+pub const TAG_CREDIT_SCALE_FACTOR: u16 = 0x0109;
+pub const TAG_END_OF_LIST: u16 = 0x0000;
+pub const TAG_GENERIC_ERROR: u16 = 0x0203;
+pub const TAG_HOST_UNIQ: u16 = 0x0103;
+pub const TAG_METRICS: u16 = 0x0107;
+pub const TAG_PPP_MAX_PAYLOAD: u16 = 0x0120;
+pub const TAG_RELAY_SESSION_ID: u16 = 0x0110;
+pub const TAG_SEQUENCE_NUMBER: u16 = 0x0108;
+pub const TAG_SERVICE_NAME: u16 = 0x0101;
+pub const TAG_SERVICE_NAME_ERROR: u16 = 0x0201;
+pub const TAG_VENDOR_SPECIFIC: u16 = 0x0105;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct MacAddr(pub [u8; 6]);

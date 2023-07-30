@@ -4,24 +4,24 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const LCP_CONFIGURE_REQUEST: u8 = 1;
-const LCP_CONFIGURE_ACK: u8 = 2;
-const LCP_CONFIGURE_NAK: u8 = 3;
-const LCP_CONFIGURE_REJECT: u8 = 4;
-const LCP_TERMINATE_REQUEST: u8 = 5;
-const LCP_TERMINATE_ACK: u8 = 6;
-const LCP_CODE_REJECT: u8 = 7;
-const LCP_PROTOCOL_REJECT: u8 = 8;
-const LCP_ECHO_REQUEST: u8 = 9;
-const LCP_ECHO_REPLY: u8 = 10;
-const LCP_DISCARD_REQUEST: u8 = 11;
+pub const LCP_CONFIGURE_REQUEST: u8 = 1;
+pub const LCP_CONFIGURE_ACK: u8 = 2;
+pub const LCP_CONFIGURE_NAK: u8 = 3;
+pub const LCP_CONFIGURE_REJECT: u8 = 4;
+pub const LCP_TERMINATE_REQUEST: u8 = 5;
+pub const LCP_TERMINATE_ACK: u8 = 6;
+pub const LCP_CODE_REJECT: u8 = 7;
+pub const LCP_PROTOCOL_REJECT: u8 = 8;
+pub const LCP_ECHO_REQUEST: u8 = 9;
+pub const LCP_ECHO_REPLY: u8 = 10;
+pub const LCP_DISCARD_REQUEST: u8 = 11;
 
-const OPT_MRU: u8 = 1;
-const OPT_AUTHENTICATION_PROTOCOL: u8 = 3;
-const OPT_QUALITY_PROTOCOL: u8 = 4;
-const OPT_MAGIC_NUMBER: u8 = 5;
-const OPT_PROTOCOL_FIELD_COMPRESSION: u8 = 7;
-const OPT_ADDR_CTL_FIELD_COMPRESSION: u8 = 8;
+pub const OPT_MRU: u8 = 1;
+pub const OPT_AUTHENTICATION_PROTOCOL: u8 = 3;
+pub const OPT_QUALITY_PROTOCOL: u8 = 4;
+pub const OPT_MAGIC_NUMBER: u8 = 5;
+pub const OPT_PROTOCOL_FIELD_COMPRESSION: u8 = 7;
+pub const OPT_ADDR_CTL_FIELD_COMPRESSION: u8 = 8;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LcpOpt {

@@ -4,16 +4,16 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const LCP: u16 = 0xc021;
-const PAP: u16 = 0xc023;
-const CHAP: u16 = 0xc223;
-const IPCP: u16 = 0x8021;
-const IPV6CP: u16 = 0x8057;
+pub const LCP: u16 = 0xc021;
+pub const PAP: u16 = 0xc023;
+pub const CHAP: u16 = 0xc223;
+pub const IPCP: u16 = 0x8021;
+pub const IPV6CP: u16 = 0x8057;
 
-const LQR: u16 = 0xc025;
-const VAN_JACOBSON: u16 = 0x002d;
+pub const LQR: u16 = 0xc025;
+pub const VAN_JACOBSON: u16 = 0x002d;
 
-const CHAP_MD5: u8 = 5;
+pub const CHAP_MD5: u8 = 5;
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

@@ -4,20 +4,20 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const IPCP_CONFIGURE_REQUEST: u8 = 1;
-const IPCP_CONFIGURE_ACK: u8 = 2;
-const IPCP_CONFIGURE_NAK: u8 = 3;
-const IPCP_CONFIGURE_REJECT: u8 = 4;
-const IPCP_TERMINATE_REQUEST: u8 = 5;
-const IPCP_TERMINATE_ACK: u8 = 6;
-const IPCP_CODE_REJECT: u8 = 7;
+pub const IPCP_CONFIGURE_REQUEST: u8 = 1;
+pub const IPCP_CONFIGURE_ACK: u8 = 2;
+pub const IPCP_CONFIGURE_NAK: u8 = 3;
+pub const IPCP_CONFIGURE_REJECT: u8 = 4;
+pub const IPCP_TERMINATE_REQUEST: u8 = 5;
+pub const IPCP_TERMINATE_ACK: u8 = 6;
+pub const IPCP_CODE_REJECT: u8 = 7;
 
 // The IP-Addresses option is deprecated and won't be implemented by me.
 // Contributions are welcome.
-const OPT_IP_COMPRESSION_PROTOCOL: u8 = 2;
-const OPT_IP_ADDRESS: u8 = 3;
-const OPT_PRIMARY_DNS: u8 = 129;
-const OPT_SECONDARY_DNS: u8 = 131;
+pub const OPT_IP_COMPRESSION_PROTOCOL: u8 = 2;
+pub const OPT_IP_ADDRESS: u8 = 3;
+pub const OPT_PRIMARY_DNS: u8 = 129;
+pub const OPT_SECONDARY_DNS: u8 = 131;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum IpcpOpt {

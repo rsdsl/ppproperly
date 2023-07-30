@@ -4,10 +4,10 @@ use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
 
-const CHAP_CHALLENGE: u8 = 1;
-const CHAP_RESPONSE: u8 = 2;
-const CHAP_SUCCESS: u8 = 3;
-const CHAP_FAILURE: u8 = 4;
+pub const CHAP_CHALLENGE: u8 = 1;
+pub const CHAP_RESPONSE: u8 = 2;
+pub const CHAP_SUCCESS: u8 = 3;
+pub const CHAP_FAILURE: u8 = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ChapData {
