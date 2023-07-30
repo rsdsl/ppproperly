@@ -16,11 +16,15 @@ const IPCP_CODE_REJECT: u8 = 7;
 // Contributions are welcome.
 const OPT_IP_COMPRESSION_PROTOCOL: u8 = 2;
 const OPT_IP_ADDRESS: u8 = 3;
+const OPT_PRIMARY_DNS: u8 = 129;
+const OPT_SECONDARY_DNS: u8 = 131;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum IpcpOpt {
     IpCompressionProtocol(IpCompressionProtocol),
     IpAddr(Ipv4Addr),
+    PrimaryDns(Ipv4Addr),
+    SecondaryDns(Ipv4Addr),
 }
 
 impl Serialize for IpcpOpt {
@@ -28,6 +32,8 @@ impl Serialize for IpcpOpt {
         match self {
             Self::IpCompressionProtocol(payload) => payload.serialize(w),
             Self::IpAddr(payload) => payload.serialize(w),
+            Self::PrimaryDns(payload) => payload.serialize(w),
+            Self::SecondaryDns(payload) => payload.serialize(w),
         }
     }
 }
@@ -37,6 +43,8 @@ impl IpcpOpt {
         match self {
             Self::IpCompressionProtocol(_) => OPT_IP_COMPRESSION_PROTOCOL,
             Self::IpAddr(_) => OPT_IP_ADDRESS,
+            Self::PrimaryDns(_) => OPT_PRIMARY_DNS,
+            Self::SecondaryDns(_) => OPT_SECONDARY_DNS,
         }
     }
 
@@ -44,6 +52,8 @@ impl IpcpOpt {
         match self {
             Self::IpCompressionProtocol(payload) => payload.len(),
             Self::IpAddr(_) => 4,
+            Self::PrimaryDns(_) => 4,
+            Self::SecondaryDns(_) => 4,
         }
     }
 
@@ -64,6 +74,18 @@ impl IpcpOpt {
 
                 tmp.deserialize(r)?;
                 *self = Self::IpAddr(tmp);
+            }
+            OPT_PRIMARY_DNS => {
+                let mut tmp = Ipv4Addr::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::PrimaryDns(tmp);
+            }
+            OPT_SECONDARY_DNS => {
+                let mut tmp = Ipv4Addr::default();
+
+                tmp.deserialize(r)?;
+                *self = Self::SecondaryDns(tmp);
             }
             _ => return Err(Error::InvalidIpcpOptionType(*discriminant)),
         }
