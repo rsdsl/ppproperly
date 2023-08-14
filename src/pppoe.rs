@@ -75,6 +75,7 @@ impl Deserialize for MacAddr {
 #[repr(u16)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EtherType {
+    Ignore = 0,
     PppoeDiscovery = ETHER_TYPE_PPPOED,
     PppoeSession = ETHER_TYPE_PPPOES,
 }
@@ -85,14 +86,12 @@ impl Default for EtherType {
     }
 }
 
-impl TryFrom<u16> for EtherType {
-    type Error = Error;
-
-    fn try_from(ether_type: u16) -> Result<Self> {
+impl From<u16> for EtherType {
+    fn from(ether_type: u16) -> Self {
         match ether_type {
-            ETHER_TYPE_PPPOED => Ok(Self::PppoeDiscovery),
-            ETHER_TYPE_PPPOES => Ok(Self::PppoeSession),
-            _ => Err(Error::InvalidEtherType(ether_type)),
+            ETHER_TYPE_PPPOED => Self::PppoeDiscovery,
+            ETHER_TYPE_PPPOES => Self::PppoeSession,
+            _ => Self::Ignore,
         }
     }
 }
@@ -108,7 +107,7 @@ impl Deserialize for EtherType {
         let mut ether_type = 0u16;
         ether_type.deserialize(r)?;
 
-        *self = Self::try_from(ether_type)?;
+        *self = Self::from(ether_type);
         Ok(())
     }
 }
@@ -377,6 +376,7 @@ impl Deserialize for Vec<PppoeTag> {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PppoeData {
+    Ignore,
     Ppp(PppPkt),
     Padi(PppoePadi),
     Pado(PppoePado),
@@ -394,6 +394,7 @@ impl Default for PppoeData {
 impl Serialize for PppoeData {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
+            Self::Ignore => Ok(()),
             Self::Ppp(payload) => payload.serialize(w),
             Self::Padi(payload) => payload.serialize(w),
             Self::Pado(payload) => payload.serialize(w),
@@ -407,6 +408,7 @@ impl Serialize for PppoeData {
 impl PppoeData {
     fn discriminant(&self) -> u8 {
         match self {
+            Self::Ignore => 0xff,
             Self::Ppp(_) => PPP,
             Self::Padi(_) => PADI,
             Self::Pado(_) => PADO,
@@ -418,6 +420,7 @@ impl PppoeData {
 
     fn len(&self) -> u16 {
         match self {
+            Self::Ignore => 0,
             Self::Ppp(payload) => payload.len(),
             Self::Padi(payload) => payload.len(),
             Self::Pado(payload) => payload.len(),
@@ -469,7 +472,7 @@ impl PppoeData {
                 tmp.deserialize(r)?;
                 *self = Self::Padt(tmp);
             }
-            _ => return Err(Error::InvalidPppoeCode(*discriminant)),
+            _ => *self = Self::Ignore,
         }
 
         Ok(())
