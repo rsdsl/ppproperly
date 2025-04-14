@@ -210,6 +210,7 @@ impl From<QualityProto> for QualityProtocol {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum IpCompressionProto {
     VanJacobsonTcpIp(VanJacobsonConfig),
+    Unhandled(u16, Vec<u8>),
 }
 
 impl Default for IpCompressionProto {
@@ -222,6 +223,7 @@ impl Serialize for IpCompressionProto {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::VanJacobsonTcpIp(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -230,12 +232,20 @@ impl IpCompressionProto {
     fn discriminant(&self) -> u16 {
         match self {
             Self::VanJacobsonTcpIp(_) => VAN_JACOBSON,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
     fn len(&self) -> u8 {
         match self {
             Self::VanJacobsonTcpIp(payload) => payload.len(),
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled ip compression protocol {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -251,7 +261,12 @@ impl IpCompressionProto {
                 tmp.deserialize(r)?;
                 *self = Self::VanJacobsonTcpIp(tmp);
             }
-            _ => return Err(Error::InvalidIpCompressionProtocol(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
