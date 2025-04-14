@@ -13,6 +13,7 @@ pub enum PapData {
     AuthenticateRequest(PapAuthenticateRequest),
     AuthenticateAck(PapAuthenticateAck),
     AuthenticateNak(PapAuthenticateNak),
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Default for PapData {
@@ -27,6 +28,7 @@ impl Serialize for PapData {
             Self::AuthenticateRequest(payload) => payload.serialize(w),
             Self::AuthenticateAck(payload) => payload.serialize(w),
             Self::AuthenticateNak(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -37,6 +39,7 @@ impl PapData {
             Self::AuthenticateRequest(_) => PAP_AUTH_REQUEST,
             Self::AuthenticateAck(_) => PAP_AUTH_ACK,
             Self::AuthenticateNak(_) => PAP_AUTH_NAK,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -45,6 +48,13 @@ impl PapData {
             Self::AuthenticateRequest(payload) => payload.len(),
             Self::AuthenticateAck(payload) => payload.len(),
             Self::AuthenticateNak(payload) => payload.len(),
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled pap code {} length {} exceeds 65535",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -72,7 +82,12 @@ impl PapData {
                 tmp.deserialize(r)?;
                 *self = Self::AuthenticateNak(tmp);
             }
-            _ => return Err(Error::InvalidPapCode(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
