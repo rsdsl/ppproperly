@@ -31,6 +31,7 @@ pub enum LcpOpt {
     MagicNumber(u32),
     ProtocolFieldCompression,
     AddrCtlFieldCompression,
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Serialize for LcpOpt {
@@ -42,6 +43,7 @@ impl Serialize for LcpOpt {
             Self::MagicNumber(payload) => payload.serialize(w),
             Self::ProtocolFieldCompression => Ok(()),
             Self::AddrCtlFieldCompression => Ok(()),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -55,6 +57,7 @@ impl LcpOpt {
             Self::MagicNumber(_) => OPT_MAGIC_NUMBER,
             Self::ProtocolFieldCompression => OPT_PROTOCOL_FIELD_COMPRESSION,
             Self::AddrCtlFieldCompression => OPT_ADDR_CTL_FIELD_COMPRESSION,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -66,6 +69,13 @@ impl LcpOpt {
             Self::MagicNumber(_) => 4,
             Self::ProtocolFieldCompression => 0,
             Self::AddrCtlFieldCompression => 0,
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled lcp option {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -105,7 +115,12 @@ impl LcpOpt {
             OPT_ADDR_CTL_FIELD_COMPRESSION => {
                 *self = Self::AddrCtlFieldCompression;
             }
-            _ => return Err(Error::InvalidLcpOptionType(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())

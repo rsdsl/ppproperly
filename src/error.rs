@@ -17,8 +17,6 @@ pub enum Error {
 
     #[error("invalid lcp code: {0}")]
     InvalidLcpCode(u8),
-    #[error("invalid lcp option type: {0}")]
-    InvalidLcpOptionType(u8),
 
     #[error("invalid authentication protocol: {0}")]
     InvalidAuthProtocol(u16),
