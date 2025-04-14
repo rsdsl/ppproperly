@@ -20,9 +20,6 @@ pub enum Error {
     #[error("invalid chap algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 
-    #[error("invalid ipcp code: {0}")]
-    InvalidIpcpCode(u8),
-
     #[error("invalid ip compression protocol: {0}")]
     InvalidIpCompressionProtocol(u16),
 

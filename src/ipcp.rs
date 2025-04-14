@@ -164,6 +164,7 @@ pub enum IpcpData {
     TerminateRequest(IpcpTerminateRequest),
     TerminateAck(IpcpTerminateAck),
     CodeReject(IpcpCodeReject),
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Default for IpcpData {
@@ -182,6 +183,7 @@ impl Serialize for IpcpData {
             Self::TerminateRequest(payload) => payload.serialize(w),
             Self::TerminateAck(payload) => payload.serialize(w),
             Self::CodeReject(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -196,6 +198,7 @@ impl IpcpData {
             Self::TerminateRequest(_) => IPCP_TERMINATE_REQUEST,
             Self::TerminateAck(_) => IPCP_TERMINATE_ACK,
             Self::CodeReject(_) => IPCP_CODE_REJECT,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -208,6 +211,13 @@ impl IpcpData {
             Self::TerminateRequest(payload) => payload.len(),
             Self::TerminateAck(payload) => payload.len(),
             Self::CodeReject(payload) => payload.len(),
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled ipcp code {} length {} exceeds 65535",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -259,7 +269,12 @@ impl IpcpData {
                 tmp.deserialize(r)?;
                 *self = Self::CodeReject(tmp);
             }
-            _ => return Err(Error::InvalidIpcpCode(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
