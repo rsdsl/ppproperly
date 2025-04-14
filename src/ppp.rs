@@ -303,6 +303,7 @@ pub enum PppData {
     Chap(ChapPkt),
     Ipcp(IpcpPkt),
     Ipv6cp(Ipv6cpPkt),
+    Unhandled(u16, Vec<u8>),
 }
 
 impl Default for PppData {
@@ -319,6 +320,7 @@ impl Serialize for PppData {
             Self::Chap(payload) => payload.serialize(w),
             Self::Ipcp(payload) => payload.serialize(w),
             Self::Ipv6cp(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -331,6 +333,7 @@ impl PppData {
             Self::Chap(_) => CHAP,
             Self::Ipcp(_) => IPCP,
             Self::Ipv6cp(_) => IPV6CP,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -341,6 +344,13 @@ impl PppData {
             Self::Chap(payload) => payload.len(),
             Self::Ipcp(payload) => payload.len(),
             Self::Ipv6cp(payload) => payload.len(),
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled ppp protocol {} packet length {} exceeds 65535",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -380,7 +390,12 @@ impl PppData {
                 tmp.deserialize(r)?;
                 *self = Self::Ipv6cp(tmp);
             }
-            _ => return Err(Error::InvalidPppProtocol(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
