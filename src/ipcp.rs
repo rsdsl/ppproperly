@@ -25,6 +25,7 @@ pub enum IpcpOpt {
     IpAddr(Ipv4Addr),
     PrimaryDns(Ipv4Addr),
     SecondaryDns(Ipv4Addr),
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Serialize for IpcpOpt {
@@ -34,6 +35,7 @@ impl Serialize for IpcpOpt {
             Self::IpAddr(payload) => payload.serialize(w),
             Self::PrimaryDns(payload) => payload.serialize(w),
             Self::SecondaryDns(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -45,6 +47,7 @@ impl IpcpOpt {
             Self::IpAddr(_) => OPT_IP_ADDRESS,
             Self::PrimaryDns(_) => OPT_PRIMARY_DNS,
             Self::SecondaryDns(_) => OPT_SECONDARY_DNS,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -54,6 +57,13 @@ impl IpcpOpt {
             Self::IpAddr(_) => 4,
             Self::PrimaryDns(_) => 4,
             Self::SecondaryDns(_) => 4,
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled ipcp option {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -87,7 +97,12 @@ impl IpcpOpt {
                 tmp.deserialize(r)?;
                 *self = Self::SecondaryDns(tmp);
             }
-            _ => return Err(Error::InvalidIpcpOptionType(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())

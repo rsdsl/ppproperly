@@ -33,8 +33,6 @@ pub enum Error {
 
     #[error("invalid ipcp code: {0}")]
     InvalidIpcpCode(u8),
-    #[error("invalid ipcp option type: {0}")]
-    InvalidIpcpOptionType(u8),
 
     #[error("invalid ip compression protocol: {0}")]
     InvalidIpCompressionProtocol(u16),
