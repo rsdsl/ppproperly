@@ -12,9 +12,6 @@ pub enum Error {
     #[error("invalid pppoe tag: {0}")]
     InvalidPppoeTag(u16),
 
-    #[error("invalid chap algorithm: {0}")]
-    InvalidChapAlgorithm(u8),
-
     #[error("conversion from utf8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),
     #[error("io: {0}")]

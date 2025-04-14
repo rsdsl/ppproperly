@@ -19,6 +19,16 @@ pub const CHAP_MD5: u8 = 5;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ChapAlgorithm {
     Md5 = CHAP_MD5,
+    Unhandled(u8),
+}
+
+impl ChapAlgorithm {
+    fn discriminant(&self) -> u8 {
+        match self {
+            Self::Md5 => CHAP_MD5,
+            Self::Unhandled(algo) => *algo,
+        }
+    }
 }
 
 impl Default for ChapAlgorithm {
@@ -27,20 +37,18 @@ impl Default for ChapAlgorithm {
     }
 }
 
-impl TryFrom<u8> for ChapAlgorithm {
-    type Error = Error;
-
-    fn try_from(chap_algorithm: u8) -> Result<Self> {
+impl From<u8> for ChapAlgorithm {
+    fn from(chap_algorithm: u8) -> Self {
         match chap_algorithm {
-            CHAP_MD5 => Ok(Self::Md5),
-            _ => Err(Error::InvalidChapAlgorithm(chap_algorithm)),
+            CHAP_MD5 => Self::Md5,
+            algo => Self::Unhandled(algo),
         }
     }
 }
 
 impl Serialize for ChapAlgorithm {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
-        (*self as u8).serialize(w)
+        self.discriminant().serialize(w)
     }
 }
 
@@ -49,7 +57,7 @@ impl Deserialize for ChapAlgorithm {
         let mut chap_algorithm = u8::default();
         chap_algorithm.deserialize(r)?;
 
-        *self = Self::try_from(chap_algorithm)?;
+        *self = Self::from(chap_algorithm);
         Ok(())
     }
 }
