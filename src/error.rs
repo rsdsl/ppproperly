@@ -39,8 +39,6 @@ pub enum Error {
 
     #[error("invalid ipv6cp code: {0}")]
     InvalidIpv6cpCode(u8),
-    #[error("invalid ipv6cp option type: {0}")]
-    InvalidIpv6cpOptionType(u8),
 
     #[error("conversion from utf8: {0}")]
     FromUtf8(#[from] string::FromUtf8Error),

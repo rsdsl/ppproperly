@@ -17,12 +17,14 @@ pub const OPT_INTERFACE_IDENTIFIER: u8 = 1;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Ipv6cpOpt {
     InterfaceId(u64),
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Serialize for Ipv6cpOpt {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::InterfaceId(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -31,12 +33,20 @@ impl Ipv6cpOpt {
     fn discriminant(&self) -> u8 {
         match self {
             Self::InterfaceId(_) => OPT_INTERFACE_IDENTIFIER,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
     fn len(&self) -> u8 {
         match self {
             Self::InterfaceId(_) => 8,
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled ipv6cp option {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -52,7 +62,12 @@ impl Ipv6cpOpt {
                 tmp.deserialize(r)?;
                 *self = Self::InterfaceId(tmp);
             }
-            _ => return Err(Error::InvalidIpv6cpOptionType(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
