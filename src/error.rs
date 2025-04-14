@@ -12,9 +12,6 @@ pub enum Error {
     #[error("invalid pppoe tag: {0}")]
     InvalidPppoeTag(u16),
 
-    #[error("invalid quality protocol: {0}")]
-    InvalidQualityProtocol(u16),
-
     #[error("invalid chap algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 

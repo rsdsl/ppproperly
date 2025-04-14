@@ -152,6 +152,7 @@ impl From<AuthProto> for AuthProtocol {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum QualityProto {
     LinkQualityReport(u32),
+    Unhandled(u16, Vec<u8>),
 }
 
 impl Default for QualityProto {
@@ -164,6 +165,7 @@ impl Serialize for QualityProto {
     fn serialize<W: Write>(&self, w: &mut W) -> Result<()> {
         match self {
             Self::LinkQualityReport(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -172,12 +174,20 @@ impl QualityProto {
     fn discriminant(&self) -> u16 {
         match self {
             Self::LinkQualityReport(_) => LQR,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
     fn len(&self) -> u8 {
         match self {
             Self::LinkQualityReport(_) => 4,
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled quality protocol {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -193,7 +203,12 @@ impl QualityProto {
                 tmp.deserialize(r)?;
                 *self = Self::LinkQualityReport(tmp);
             }
-            _ => return Err(Error::InvalidQualityProtocol(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
