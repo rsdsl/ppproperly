@@ -17,11 +17,6 @@ pub enum Error {
     #[error("invalid quality protocol: {0}")]
     InvalidQualityProtocol(u16),
 
-    #[error("invalid pap code: {0}")]
-    InvalidPapCode(u8),
-
-    #[error("invalid chap code: {0}")]
-    InvalidChapCode(u8),
     #[error("invalid chap algorithm: {0}")]
     InvalidChapAlgorithm(u8),
 

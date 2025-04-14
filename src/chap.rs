@@ -15,6 +15,7 @@ pub enum ChapData {
     Response(ChapResponse),
     Success(ChapSuccess),
     Failure(ChapFailure),
+    Unhandled(u8, Vec<u8>),
 }
 
 impl Default for ChapData {
@@ -30,6 +31,7 @@ impl Serialize for ChapData {
             Self::Response(payload) => payload.serialize(w),
             Self::Success(payload) => payload.serialize(w),
             Self::Failure(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -41,6 +43,7 @@ impl ChapData {
             Self::Response(_) => CHAP_RESPONSE,
             Self::Success(_) => CHAP_SUCCESS,
             Self::Failure(_) => CHAP_FAILURE,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -50,6 +53,13 @@ impl ChapData {
             Self::Response(payload) => payload.len(),
             Self::Success(payload) => payload.len(),
             Self::Failure(payload) => payload.len(),
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled chap code {} length {} exceeds 65535",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -83,7 +93,12 @@ impl ChapData {
                 tmp.deserialize(r)?;
                 *self = Self::Failure(tmp);
             }
-            _ => return Err(Error::InvalidChapCode(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
