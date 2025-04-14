@@ -12,9 +12,6 @@ pub enum Error {
     #[error("invalid pppoe tag: {0}")]
     InvalidPppoeTag(u16),
 
-    #[error("invalid lcp code: {0}")]
-    InvalidLcpCode(u8),
-
     #[error("invalid authentication protocol: {0}")]
     InvalidAuthProtocol(u16),
     #[error("invalid quality protocol: {0}")]
