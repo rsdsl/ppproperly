@@ -58,6 +58,7 @@ impl Deserialize for ChapAlgorithm {
 pub enum AuthProto {
     Pap,
     Chap(ChapAlgorithm),
+    Unhandled(u16, Vec<u8>),
 }
 
 impl Default for AuthProto {
@@ -71,6 +72,7 @@ impl Serialize for AuthProto {
         match self {
             Self::Pap => Ok(()),
             Self::Chap(payload) => payload.serialize(w),
+            Self::Unhandled(_, payload) => w.write_all(payload).map_err(Error::from),
         }
     }
 }
@@ -80,6 +82,7 @@ impl AuthProto {
         match self {
             Self::Pap => PAP,
             Self::Chap(_) => CHAP,
+            Self::Unhandled(ty, _) => *ty,
         }
     }
 
@@ -87,6 +90,13 @@ impl AuthProto {
         match self {
             Self::Pap => 0,
             Self::Chap(_) => 1,
+            Self::Unhandled(ty, payload) => payload.len().try_into().unwrap_or_else(|_| {
+                panic!(
+                    "unhandled auth protocol {} length {} exceeds 255",
+                    *ty,
+                    payload.len()
+                )
+            }),
         }
     }
 
@@ -105,7 +115,12 @@ impl AuthProto {
                 tmp.deserialize(r)?;
                 *self = Self::Chap(tmp);
             }
-            _ => return Err(Error::InvalidAuthProtocol(*discriminant)),
+            _ => {
+                let mut tmp = Vec::new();
+
+                r.read_to_end(&mut tmp)?;
+                *self = Self::Unhandled(*discriminant, tmp);
+            }
         }
 
         Ok(())
