@@ -1,5 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -151,6 +152,19 @@ impl ChapPkt {
     }
 }
 
+impl fmt::Display for ChapPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CHAP id={}: ", self.identifier)?;
+        match &self.data {
+            ChapData::Challenge(challenge) => challenge.fmt(f),
+            ChapData::Response(resp) => resp.fmt(f),
+            ChapData::Success(success) => success.fmt(f),
+            ChapData::Failure(fail) => fail.fmt(f),
+            ChapData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapChallenge {
     #[ppproperly(len_for(field = "value", offset = 0, data_type = "u8"))]
@@ -165,6 +179,12 @@ impl ChapChallenge {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 1
+    }
+}
+
+impl fmt::Display for ChapChallenge {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Challenge {:?} {}", self.value, self.name)
     }
 }
 
@@ -185,6 +205,12 @@ impl ChapResponse {
     }
 }
 
+impl fmt::Display for ChapResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Response {:?} {}", self.value, self.name)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapSuccess {
     pub message: String,
@@ -200,6 +226,12 @@ impl ChapSuccess {
     }
 }
 
+impl fmt::Display for ChapSuccess {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Success: {}", self.message)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChapFailure {
     pub message: String,
@@ -212,5 +244,11 @@ impl ChapFailure {
 
     pub fn is_empty(&self) -> bool {
         self.message.is_empty()
+    }
+}
+
+impl fmt::Display for ChapFailure {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Failure: {}", self.message)
     }
 }

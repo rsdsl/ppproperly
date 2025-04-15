@@ -569,6 +569,48 @@ impl PppoePkt {
     }
 }
 
+impl Display for PppoePkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.data {
+            PppoeData::Ignore => writeln!(
+                f,
+                "PPPoE dst={} src={} sid={}: invalid code",
+                self.dst_mac, self.src_mac, self.session_id
+            ),
+            PppoeData::Ppp(pkt) => writeln!(
+                f,
+                "PPPoES dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, pkt
+            ),
+            PppoeData::Padi(padi) => writeln!(
+                f,
+                "PPPoED dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, padi
+            ),
+            PppoeData::Pado(pado) => writeln!(
+                f,
+                "PPPoED dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, pado
+            ),
+            PppoeData::Padr(padr) => writeln!(
+                f,
+                "PPPoED dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, padr
+            ),
+            PppoeData::Pads(pads) => writeln!(
+                f,
+                "PPPoED dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, pads
+            ),
+            PppoeData::Padt(padt) => writeln!(
+                f,
+                "PPPoED dst={} src={} sid={}: {}",
+                self.dst_mac, self.src_mac, self.session_id, padt
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PppoePadi {
     pub tags: Vec<PppoeTag>,
@@ -585,6 +627,12 @@ impl PppoePadi {
 
     pub fn is_empty(&self) -> bool {
         self.tags.is_empty()
+    }
+}
+
+impl Display for PppoePadi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "PADI {:?}", self.tags)
     }
 }
 
@@ -607,6 +655,12 @@ impl PppoePado {
     }
 }
 
+impl Display for PppoePado {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "PADO {:?}", self.tags)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PppoePadr {
     pub tags: Vec<PppoeTag>,
@@ -623,6 +677,12 @@ impl PppoePadr {
 
     pub fn is_empty(&self) -> bool {
         self.tags.is_empty()
+    }
+}
+
+impl Display for PppoePadr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "PADR {:?}", self.tags)
     }
 }
 
@@ -645,6 +705,12 @@ impl PppoePads {
     }
 }
 
+impl Display for PppoePads {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "PADS {:?}", self.tags)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PppoePadt {
     pub tags: Vec<PppoeTag>,
@@ -661,5 +727,11 @@ impl PppoePadt {
 
     pub fn is_empty(&self) -> bool {
         self.tags.is_empty()
+    }
+}
+
+impl Display for PppoePadt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "PADT {:?}", self.tags)
     }
 }

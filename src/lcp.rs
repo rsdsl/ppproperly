@@ -1,5 +1,6 @@
 use crate::{AuthProtocol, Deserialize, Error, QualityProtocol, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -434,6 +435,26 @@ impl LcpPkt {
     }
 }
 
+impl fmt::Display for LcpPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "LCP id={}: ", self.identifier)?;
+        match &self.data {
+            LcpData::ConfigureRequest(cfg_req) => cfg_req.fmt(f),
+            LcpData::ConfigureAck(cfg_ack) => cfg_ack.fmt(f),
+            LcpData::ConfigureNak(cfg_nak) => cfg_nak.fmt(f),
+            LcpData::ConfigureReject(cfg_rej) => cfg_rej.fmt(f),
+            LcpData::TerminateRequest(term_req) => term_req.fmt(f),
+            LcpData::TerminateAck(term_ack) => term_ack.fmt(f),
+            LcpData::CodeReject(code_rej) => code_rej.fmt(f),
+            LcpData::ProtocolReject(proto_rej) => proto_rej.fmt(f),
+            LcpData::EchoRequest(echo_req) => echo_req.fmt(f),
+            LcpData::EchoReply(echo_rep) => echo_rep.fmt(f),
+            LcpData::DiscardRequest(disc_req) => disc_req.fmt(f),
+            LcpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureRequest {
     pub options: Vec<LcpOption>,
@@ -451,6 +472,12 @@ impl LcpConfigureRequest {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for LcpConfigureRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -474,6 +501,12 @@ impl LcpConfigureAck {
     }
 }
 
+impl fmt::Display for LcpConfigureAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Ack {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpConfigureNak {
     pub options: Vec<LcpOption>,
@@ -491,6 +524,12 @@ impl LcpConfigureNak {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for LcpConfigureNak {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -514,6 +553,12 @@ impl LcpConfigureReject {
     }
 }
 
+impl fmt::Display for LcpConfigureReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Rej {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpTerminateRequest {
     pub data: Vec<u8>,
@@ -526,6 +571,16 @@ impl LcpTerminateRequest {
 
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
+    }
+}
+
+impl fmt::Display for LcpTerminateRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Req {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
     }
 }
 
@@ -544,6 +599,16 @@ impl LcpTerminateAck {
     }
 }
 
+impl fmt::Display for LcpTerminateAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Ack {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpCodeReject {
     pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
@@ -556,6 +621,12 @@ impl LcpCodeReject {
 
     pub fn is_empty(&self) -> bool {
         self.pkt.is_empty()
+    }
+}
+
+impl fmt::Display for LcpCodeReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Code-Rej {:?}", self.pkt)
     }
 }
 
@@ -575,6 +646,12 @@ impl LcpProtocolReject {
     }
 }
 
+impl fmt::Display for LcpProtocolReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Proto-Rej {}: {:?}", self.protocol, self.pkt)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpEchoRequest {
     pub magic: u32,
@@ -588,6 +665,12 @@ impl LcpEchoRequest {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 4
+    }
+}
+
+impl fmt::Display for LcpEchoRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Echo-Req {}: {:?}", self.magic, self.data)
     }
 }
 
@@ -607,6 +690,12 @@ impl LcpEchoReply {
     }
 }
 
+impl fmt::Display for LcpEchoReply {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Echo-Reply {}: {:?}", self.magic, self.data)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LcpDiscardRequest {
     pub magic: u32,
@@ -620,5 +709,11 @@ impl LcpDiscardRequest {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 4
+    }
+}
+
+impl fmt::Display for LcpDiscardRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Discard-Req {}: {:?}", self.magic, self.data)
     }
 }

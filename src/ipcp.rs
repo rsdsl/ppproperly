@@ -1,5 +1,6 @@
 use crate::{Deserialize, Error, IpCompressionProtocol, Ipv4Addr, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -348,6 +349,22 @@ impl IpcpPkt {
     }
 }
 
+impl fmt::Display for IpcpPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "IPCP id={}: ", self.identifier)?;
+        match &self.data {
+            IpcpData::ConfigureRequest(cfg_req) => cfg_req.fmt(f),
+            IpcpData::ConfigureAck(cfg_ack) => cfg_ack.fmt(f),
+            IpcpData::ConfigureNak(cfg_nak) => cfg_nak.fmt(f),
+            IpcpData::ConfigureReject(cfg_rej) => cfg_rej.fmt(f),
+            IpcpData::TerminateRequest(term_req) => term_req.fmt(f),
+            IpcpData::TerminateAck(term_ack) => term_ack.fmt(f),
+            IpcpData::CodeReject(code_rej) => code_rej.fmt(f),
+            IpcpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureRequest {
     pub options: Vec<IpcpOption>,
@@ -365,6 +382,12 @@ impl IpcpConfigureRequest {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for IpcpConfigureRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -388,6 +411,12 @@ impl IpcpConfigureAck {
     }
 }
 
+impl fmt::Display for IpcpConfigureAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Ack {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpConfigureNak {
     pub options: Vec<IpcpOption>,
@@ -405,6 +434,12 @@ impl IpcpConfigureNak {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for IpcpConfigureNak {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -428,6 +463,12 @@ impl IpcpConfigureReject {
     }
 }
 
+impl fmt::Display for IpcpConfigureReject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Cfg-Rej {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpTerminateRequest {
     pub data: Vec<u8>,
@@ -440,6 +481,16 @@ impl IpcpTerminateRequest {
 
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
+    }
+}
+
+impl fmt::Display for IpcpTerminateRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Req {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
     }
 }
 
@@ -458,6 +509,16 @@ impl IpcpTerminateAck {
     }
 }
 
+impl fmt::Display for IpcpTerminateAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Ack {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct IpcpCodeReject {
     pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
@@ -470,5 +531,11 @@ impl IpcpCodeReject {
 
     pub fn is_empty(&self) -> bool {
         self.pkt.is_empty()
+    }
+}
+
+impl fmt::Display for IpcpCodeReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Code-Rej {:?}", self.pkt)
     }
 }

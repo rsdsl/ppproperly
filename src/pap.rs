@@ -1,5 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -133,6 +134,18 @@ impl PapPkt {
     }
 }
 
+impl fmt::Display for PapPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "PAP id={}: ", self.identifier)?;
+        match &self.data {
+            PapData::AuthenticateRequest(auth_req) => auth_req.fmt(f),
+            PapData::AuthenticateAck(auth_ack) => auth_ack.fmt(f),
+            PapData::AuthenticateNak(auth_nak) => auth_nak.fmt(f),
+            PapData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateRequest {
     #[ppproperly(len_for(field = "peer_id", offset = 0, data_type = "u8"))]
@@ -153,6 +166,17 @@ impl PapAuthenticateRequest {
     }
 }
 
+impl fmt::Display for PapAuthenticateRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let passwd_censored = "*".repeat(self.passwd.len());
+        writeln!(
+            f,
+            "Auth-Req peerid={} passwd={}",
+            self.peer_id, passwd_censored
+        )
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateAck {
     #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
@@ -169,6 +193,12 @@ impl PapAuthenticateAck {
     }
 }
 
+impl fmt::Display for PapAuthenticateAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Auth-Ack: {}", self.msg)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PapAuthenticateNak {
     #[ppproperly(len_for(field = "msg", offset = 0, data_type = "u8"))]
@@ -182,5 +212,11 @@ impl PapAuthenticateNak {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 1
+    }
+}
+
+impl fmt::Display for PapAuthenticateNak {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Auth-Nak: {}", self.msg)
     }
 }

@@ -1,5 +1,6 @@
 use crate::{ChapPkt, Deserialize, Error, IpcpPkt, Ipv6cpPkt, LcpPkt, PapPkt, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -498,5 +499,18 @@ impl PppPkt {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 2
+    }
+}
+
+impl fmt::Display for PppPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.data {
+            PppData::Lcp(lcp) => lcp.fmt(f),
+            PppData::Pap(pap) => pap.fmt(f),
+            PppData::Chap(chap) => chap.fmt(f),
+            PppData::Ipcp(ipcp) => ipcp.fmt(f),
+            PppData::Ipv6cp(ipv6cp) => ipv6cp.fmt(f),
+            PppData::Unhandled(ty, payload) => writeln!(f, "PPP {}: {:?}", ty, payload),
+        }
     }
 }

@@ -1,5 +1,6 @@
 use crate::{Deserialize, Error, Result, Serialize};
 
+use std::fmt;
 use std::io::{Read, Write};
 
 use ppproperly_macros::{Deserialize, Serialize};
@@ -313,6 +314,22 @@ impl Ipv6cpPkt {
     }
 }
 
+impl fmt::Display for Ipv6cpPkt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "IPv6CP id={}: ", self.identifier)?;
+        match &self.data {
+            Ipv6cpData::ConfigureRequest(cfg_req) => cfg_req.fmt(f),
+            Ipv6cpData::ConfigureAck(cfg_ack) => cfg_ack.fmt(f),
+            Ipv6cpData::ConfigureNak(cfg_nak) => cfg_nak.fmt(f),
+            Ipv6cpData::ConfigureReject(cfg_rej) => cfg_rej.fmt(f),
+            Ipv6cpData::TerminateRequest(term_req) => term_req.fmt(f),
+            Ipv6cpData::TerminateAck(term_ack) => term_ack.fmt(f),
+            Ipv6cpData::CodeReject(code_rej) => code_rej.fmt(f),
+            Ipv6cpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureRequest {
     pub options: Vec<Ipv6cpOption>,
@@ -330,6 +347,12 @@ impl Ipv6cpConfigureRequest {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for Ipv6cpConfigureRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -353,6 +376,12 @@ impl Ipv6cpConfigureAck {
     }
 }
 
+impl fmt::Display for Ipv6cpConfigureAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Ack {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpConfigureNak {
     pub options: Vec<Ipv6cpOption>,
@@ -370,6 +399,12 @@ impl Ipv6cpConfigureNak {
 
     pub fn is_empty(&self) -> bool {
         self.options.is_empty()
+    }
+}
+
+impl fmt::Display for Ipv6cpConfigureNak {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -393,6 +428,12 @@ impl Ipv6cpConfigureReject {
     }
 }
 
+impl fmt::Display for Ipv6cpConfigureReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Cfg-Rej {:?}", self.options)
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpTerminateRequest {
     pub data: Vec<u8>,
@@ -405,6 +446,16 @@ impl Ipv6cpTerminateRequest {
 
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
+    }
+}
+
+impl fmt::Display for Ipv6cpTerminateRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Req {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
     }
 }
 
@@ -423,6 +474,16 @@ impl Ipv6cpTerminateAck {
     }
 }
 
+impl fmt::Display for Ipv6cpTerminateAck {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "Term-Ack {}",
+            std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
+        )
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Ipv6cpCodeReject {
     pub pkt: Vec<u8>, // Vec makes MRU truncating easier without overwriting (de)ser impls.
@@ -435,5 +496,11 @@ impl Ipv6cpCodeReject {
 
     pub fn is_empty(&self) -> bool {
         self.pkt.is_empty()
+    }
+}
+
+impl fmt::Display for Ipv6cpCodeReject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Code-Rej {:?}", self.pkt)
     }
 }
