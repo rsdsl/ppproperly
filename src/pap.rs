@@ -141,7 +141,7 @@ impl fmt::Display for PapPkt {
             PapData::AuthenticateRequest(auth_req) => auth_req.fmt(f),
             PapData::AuthenticateAck(auth_ack) => auth_ack.fmt(f),
             PapData::AuthenticateNak(auth_nak) => auth_nak.fmt(f),
-            PapData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+            PapData::Unhandled(ty, payload) => write!(f, "uc={} {:?}", ty, payload),
         }
     }
 }
@@ -169,7 +169,7 @@ impl PapAuthenticateRequest {
 impl fmt::Display for PapAuthenticateRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let passwd_censored = "*".repeat(self.passwd.len());
-        writeln!(
+        write!(
             f,
             "Auth-Req peerid={} passwd={}",
             self.peer_id, passwd_censored
@@ -195,7 +195,7 @@ impl PapAuthenticateAck {
 
 impl fmt::Display for PapAuthenticateAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Auth-Ack: {}", self.msg)
+        write!(f, "Auth-Ack: {}", self.msg)
     }
 }
 
@@ -217,6 +217,6 @@ impl PapAuthenticateNak {
 
 impl fmt::Display for PapAuthenticateNak {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Auth-Nak: {}", self.msg)
+        write!(f, "Auth-Nak: {}", self.msg)
     }
 }

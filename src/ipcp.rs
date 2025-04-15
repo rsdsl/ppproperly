@@ -360,7 +360,7 @@ impl fmt::Display for IpcpPkt {
             IpcpData::TerminateRequest(term_req) => term_req.fmt(f),
             IpcpData::TerminateAck(term_ack) => term_ack.fmt(f),
             IpcpData::CodeReject(code_rej) => code_rej.fmt(f),
-            IpcpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+            IpcpData::Unhandled(ty, payload) => write!(f, "uc={} {:?}", ty, payload),
         }
     }
 }
@@ -387,7 +387,7 @@ impl IpcpConfigureRequest {
 
 impl fmt::Display for IpcpConfigureRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Req {:?}", self.options)
+        write!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -413,7 +413,7 @@ impl IpcpConfigureAck {
 
 impl fmt::Display for IpcpConfigureAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Ack {:?}", self.options)
+        write!(f, "Cfg-Ack {:?}", self.options)
     }
 }
 
@@ -439,7 +439,7 @@ impl IpcpConfigureNak {
 
 impl fmt::Display for IpcpConfigureNak {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Nak {:?}", self.options)
+        write!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -465,7 +465,7 @@ impl IpcpConfigureReject {
 
 impl fmt::Display for IpcpConfigureReject {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Cfg-Rej {:?}", self.options)
+        write!(f, "Cfg-Rej {:?}", self.options)
     }
 }
 
@@ -486,7 +486,7 @@ impl IpcpTerminateRequest {
 
 impl fmt::Display for IpcpTerminateRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Req {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -511,7 +511,7 @@ impl IpcpTerminateAck {
 
 impl fmt::Display for IpcpTerminateAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Ack {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -536,6 +536,6 @@ impl IpcpCodeReject {
 
 impl fmt::Display for IpcpCodeReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Code-Rej {:?}", self.pkt)
+        write!(f, "Code-Rej {:?}", self.pkt)
     }
 }

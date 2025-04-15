@@ -160,7 +160,7 @@ impl fmt::Display for ChapPkt {
             ChapData::Response(resp) => resp.fmt(f),
             ChapData::Success(success) => success.fmt(f),
             ChapData::Failure(fail) => fail.fmt(f),
-            ChapData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+            ChapData::Unhandled(ty, payload) => write!(f, "uc={} {:?}", ty, payload),
         }
     }
 }
@@ -184,7 +184,7 @@ impl ChapChallenge {
 
 impl fmt::Display for ChapChallenge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Challenge {:?} {}", self.value, self.name)
+        write!(f, "Challenge {:?} {}", self.value, self.name)
     }
 }
 
@@ -207,7 +207,7 @@ impl ChapResponse {
 
 impl fmt::Display for ChapResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Response {:?} {}", self.value, self.name)
+        write!(f, "Response {:?} {}", self.value, self.name)
     }
 }
 
@@ -228,7 +228,7 @@ impl ChapSuccess {
 
 impl fmt::Display for ChapSuccess {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Success: {}", self.message)
+        write!(f, "Success: {}", self.message)
     }
 }
 
@@ -249,6 +249,6 @@ impl ChapFailure {
 
 impl fmt::Display for ChapFailure {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Failure: {}", self.message)
+        write!(f, "Failure: {}", self.message)
     }
 }

@@ -572,37 +572,37 @@ impl PppoePkt {
 impl Display for PppoePkt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.data {
-            PppoeData::Ignore => writeln!(
+            PppoeData::Ignore => write!(
                 f,
                 "PPPoE dst={} src={} sid={}: invalid code",
                 self.dst_mac, self.src_mac, self.session_id
             ),
-            PppoeData::Ppp(pkt) => writeln!(
+            PppoeData::Ppp(pkt) => write!(
                 f,
                 "PPPoES dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, pkt
             ),
-            PppoeData::Padi(padi) => writeln!(
+            PppoeData::Padi(padi) => write!(
                 f,
                 "PPPoED dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, padi
             ),
-            PppoeData::Pado(pado) => writeln!(
+            PppoeData::Pado(pado) => write!(
                 f,
                 "PPPoED dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, pado
             ),
-            PppoeData::Padr(padr) => writeln!(
+            PppoeData::Padr(padr) => write!(
                 f,
                 "PPPoED dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, padr
             ),
-            PppoeData::Pads(pads) => writeln!(
+            PppoeData::Pads(pads) => write!(
                 f,
                 "PPPoED dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, pads
             ),
-            PppoeData::Padt(padt) => writeln!(
+            PppoeData::Padt(padt) => write!(
                 f,
                 "PPPoED dst={} src={} sid={}: {}",
                 self.dst_mac, self.src_mac, self.session_id, padt
@@ -632,7 +632,7 @@ impl PppoePadi {
 
 impl Display for PppoePadi {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "PADI {:?}", self.tags)
+        write!(f, "PADI {:?}", self.tags)
     }
 }
 
@@ -657,7 +657,7 @@ impl PppoePado {
 
 impl Display for PppoePado {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "PADO {:?}", self.tags)
+        write!(f, "PADO {:?}", self.tags)
     }
 }
 
@@ -682,7 +682,7 @@ impl PppoePadr {
 
 impl Display for PppoePadr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "PADR {:?}", self.tags)
+        write!(f, "PADR {:?}", self.tags)
     }
 }
 
@@ -707,7 +707,7 @@ impl PppoePads {
 
 impl Display for PppoePads {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "PADS {:?}", self.tags)
+        write!(f, "PADS {:?}", self.tags)
     }
 }
 
@@ -732,6 +732,6 @@ impl PppoePadt {
 
 impl Display for PppoePadt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "PADT {:?}", self.tags)
+        write!(f, "PADT {:?}", self.tags)
     }
 }

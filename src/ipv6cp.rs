@@ -325,7 +325,7 @@ impl fmt::Display for Ipv6cpPkt {
             Ipv6cpData::TerminateRequest(term_req) => term_req.fmt(f),
             Ipv6cpData::TerminateAck(term_ack) => term_ack.fmt(f),
             Ipv6cpData::CodeReject(code_rej) => code_rej.fmt(f),
-            Ipv6cpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+            Ipv6cpData::Unhandled(ty, payload) => write!(f, "uc={} {:?}", ty, payload),
         }
     }
 }
@@ -352,7 +352,7 @@ impl Ipv6cpConfigureRequest {
 
 impl fmt::Display for Ipv6cpConfigureRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Req {:?}", self.options)
+        write!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -378,7 +378,7 @@ impl Ipv6cpConfigureAck {
 
 impl fmt::Display for Ipv6cpConfigureAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Ack {:?}", self.options)
+        write!(f, "Cfg-Ack {:?}", self.options)
     }
 }
 
@@ -404,7 +404,7 @@ impl Ipv6cpConfigureNak {
 
 impl fmt::Display for Ipv6cpConfigureNak {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Nak {:?}", self.options)
+        write!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -430,7 +430,7 @@ impl Ipv6cpConfigureReject {
 
 impl fmt::Display for Ipv6cpConfigureReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Rej {:?}", self.options)
+        write!(f, "Cfg-Rej {:?}", self.options)
     }
 }
 
@@ -451,7 +451,7 @@ impl Ipv6cpTerminateRequest {
 
 impl fmt::Display for Ipv6cpTerminateRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Req {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -476,7 +476,7 @@ impl Ipv6cpTerminateAck {
 
 impl fmt::Display for Ipv6cpTerminateAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Ack {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -501,6 +501,6 @@ impl Ipv6cpCodeReject {
 
 impl fmt::Display for Ipv6cpCodeReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Code-Rej {:?}", self.pkt)
+        write!(f, "Code-Rej {:?}", self.pkt)
     }
 }

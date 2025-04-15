@@ -450,7 +450,7 @@ impl fmt::Display for LcpPkt {
             LcpData::EchoRequest(echo_req) => echo_req.fmt(f),
             LcpData::EchoReply(echo_rep) => echo_rep.fmt(f),
             LcpData::DiscardRequest(disc_req) => disc_req.fmt(f),
-            LcpData::Unhandled(ty, payload) => writeln!(f, "uc={} {:?}", ty, payload),
+            LcpData::Unhandled(ty, payload) => write!(f, "uc={} {:?}", ty, payload),
         }
     }
 }
@@ -477,7 +477,7 @@ impl LcpConfigureRequest {
 
 impl fmt::Display for LcpConfigureRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Req {:?}", self.options)
+        write!(f, "Cfg-Req {:?}", self.options)
     }
 }
 
@@ -503,7 +503,7 @@ impl LcpConfigureAck {
 
 impl fmt::Display for LcpConfigureAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Ack {:?}", self.options)
+        write!(f, "Cfg-Ack {:?}", self.options)
     }
 }
 
@@ -529,7 +529,7 @@ impl LcpConfigureNak {
 
 impl fmt::Display for LcpConfigureNak {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Nak {:?}", self.options)
+        write!(f, "Cfg-Nak {:?}", self.options)
     }
 }
 
@@ -555,7 +555,7 @@ impl LcpConfigureReject {
 
 impl fmt::Display for LcpConfigureReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Cfg-Rej {:?}", self.options)
+        write!(f, "Cfg-Rej {:?}", self.options)
     }
 }
 
@@ -576,7 +576,7 @@ impl LcpTerminateRequest {
 
 impl fmt::Display for LcpTerminateRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Req {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -601,7 +601,7 @@ impl LcpTerminateAck {
 
 impl fmt::Display for LcpTerminateAck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
+        write!(
             f,
             "Term-Ack {}",
             std::str::from_utf8(&self.data).unwrap_or(&format!("{:?}", self.data))
@@ -626,7 +626,7 @@ impl LcpCodeReject {
 
 impl fmt::Display for LcpCodeReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Code-Rej {:?}", self.pkt)
+        write!(f, "Code-Rej {:?}", self.pkt)
     }
 }
 
@@ -648,7 +648,7 @@ impl LcpProtocolReject {
 
 impl fmt::Display for LcpProtocolReject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Proto-Rej {}: {:?}", self.protocol, self.pkt)
+        write!(f, "Proto-Rej {}: {:?}", self.protocol, self.pkt)
     }
 }
 
@@ -670,7 +670,7 @@ impl LcpEchoRequest {
 
 impl fmt::Display for LcpEchoRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Echo-Req {}: {:?}", self.magic, self.data)
+        write!(f, "Echo-Req {}: {:?}", self.magic, self.data)
     }
 }
 
@@ -692,7 +692,7 @@ impl LcpEchoReply {
 
 impl fmt::Display for LcpEchoReply {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Echo-Reply {}: {:?}", self.magic, self.data)
+        write!(f, "Echo-Reply {}: {:?}", self.magic, self.data)
     }
 }
 
@@ -714,6 +714,6 @@ impl LcpDiscardRequest {
 
 impl fmt::Display for LcpDiscardRequest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Discard-Req {}: {:?}", self.magic, self.data)
+        write!(f, "Discard-Req {}: {:?}", self.magic, self.data)
     }
 }
